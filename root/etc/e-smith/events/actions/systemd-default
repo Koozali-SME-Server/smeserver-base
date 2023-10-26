@@ -1,0 +1,231 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Errno;
+use esmith::ConfigDB;
+use File::Temp;
+use esmith::templates;
+use File::Basename;
+use Cwd 'abs_path';
+
+my $conf = esmith::ConfigDB->open_ro;
+
+
+my $event = $ARGV [0];
+my $second = $ARGV [1];
+
+my @servicedirpaths = ("/usr/lib/systemd/system/","/etc/systemd/system/");
+my @presetdirpaths = ("/usr/lib/systemd/system-preset/","/etc/systemd/system-preset/");
+my $filename = "/etc/systemd/system-preset/49-koozali.preset";
+my $filename2 = "/usr/lib/systemd/system/sme-server.target.d/50koozali.conf";
+my %services;
+my %files;
+my @WantedBy;
+
+# expand preset file
+esmith::templates::processTemplate({
+                MORE_DATA => { },
+                TEMPLATE_PATH => $filename,
+                OUTPUT_FILENAME => $filename,
+            });
+# expand content of sme-server.target.d
+esmith::templates::processTemplate({
+                MORE_DATA => { },
+                TEMPLATE_PATH => $filename2,
+                OUTPUT_FILENAME => $filename2,
+            });
+
+# make sure our target is enabled
+system("/usr/bin/systemctl  enable sme-server.target");
+# force the main default target in /usr/lib
+#ln -fs sme-server.target /lib/systemd/system/default.target
+my $old_qfn = "sme-server.target";
+my $new_qfn = "/lib/systemd/system/default.target";
+if (!symlink($old_qfn, $new_qfn)) {
+   if ($!{EEXIST}) {
+      unlink($new_qfn)
+         or die("Can't remove \"$new_qfn\": $!\n");
+      symlink($old_qfn, $new_qfn)
+         or die("Can't create symlink \"$new_qfn\": $!\n");
+   } else {
+      die("Can't create symlink \"$new_qfn\": $!\n");
+   }
+}
+
+# we let the dedicated systemd command tryin to do what we will do later in this script
+# as up to systemd 236 it is bugged see:
+#  https://github.com/systemd/systemd/pull/7158 and https://github.com/systemd/systemd/pull/7289
+system("/usr/bin/systemctl  preset-all");
+# in case preset-all messed up  with our default target
+system("/usr/bin/systemctl  set-default sme-server.target");
+
+# list both preset directories
+# seek files to be removed from usr/lib if same basename exist 
+foreach my $d (@presetdirpaths) {
+	opendir my $dir, "$d" or die "Cannot open directory: $!";
+	my @dirfiles = readdir $dir;
+	closedir $dir;
+	foreach my $fi (@dirfiles) {
+	        next unless ($fi =~ /.preset$/);
+		$files{$fi}="$d$fi"
+	}
+}
+
+# list wanted services in the sme-server.target
+#Wants=acpid.service atd.service auditd.service avahi-daemon.service brandbot.path crond.service irqbalance.service nfs-client.target remote-fs.target rhel-configure.service rsyslog.service smartd.service yum-cron.service
+my $smewants = `grep -P '^Wants=' /usr/lib/systemd/system/sme-server.target -rs`;
+chomp $smewants;
+my @smematches = ( $smewants =~ /([a-zA-Z0-9\-_]+\.service)/g );
+ 
+
+# parse all files on reverse order : lower number take precedence
+# we ignore joker lines *
+# we ignore @ lines
+# we ignore multiple in one line
+# our default at the end is to disable if not listed
+foreach my $filen (reverse sort keys %files) { 
+#print "==============> $filen : ".$files{$filen} ."\n";
+	# parsing $filename  content
+	# should end with hash with 2 possible value : enable and disable
+	# ignore lines starting with # or empty character
+	open(FILE, '<', $files{$filen}) or die $!;
+	while (<FILE>)	{
+	    chomp; # remove newlines
+	    next if (/^\s+$/);
+	    next if (/^#/);
+	    s/^\s+//;  # remove leading whitespace
+	    s/\s+$//; # remove trailing whitespace
+	    next unless length; # next rec unless anything left
+#           print $_ ."\n";
+	    next unless (/^(enable|disable)\s+([a-zA-Z0-9\-_.@]+\.service)/);
+	    my $service=$2;
+	    my $stats=$1;
+#	    print $_ ."\n"; 
+	    #ignore service that does not exists !
+	    my $multiple = $service;
+	    ($multiple = $service ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $service =~ /@/ );
+	    #print "$stats $service $multiple\n";
+	    next unless ( -e "/usr/lib/systemd/system/$service" or -e "/etc/lib/systemd/system/$service" or -e "/usr/lib/systemd/system/$multiple");
+	    # eliminate duplicates, this way we keep only the last entry of the lowest file as we do it in reverse order of file,
+	    # but from top to bottom of file.
+	    $services{$service}=$stats;
+
+	    # list all Services explicitely listed in preset that are also in Wants= or with WantedBy= sme-server.target 
+	    next if (/^$service$/ ~~ @WantedBy);
+	    if (  /^$service$/ ~~ @smematches ) {
+                push(@WantedBy, $service);
+		#print "want $service \n";
+            }
+            else {
+                my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* -rsh` ;
+                chomp $wanted;
+                push(@WantedBy , $service)  unless ( $wanted eq "") ;
+		#print "want $service \n" unless ( $wanted eq "") ;
+            }
+
+	}
+}
+
+# then check content of /etc/systemd/system/sme-server.target.wants/
+# remove what is not in enable
+my $d = "/etc/systemd/system/sme-server.target.wants/";
+opendir my $dir, "$d" or die "Cannot open directory: $!";
+my @dirfiles = readdir $dir;
+closedir $dir;
+foreach my $fi (@dirfiles) {
+        # we ignore . and ..
+        next if $fi =~ /\.+$/;
+        # for the moment we only consider service  files and ignore target, mount, device, socket...
+        next unless ($fi =~ /.service$/);
+	# remove if file but not a link
+	unless ( -l "$d$fi") {
+		print "remove $d$fi : not a link\n";
+		unlink "$d$fi";
+		next;
+	}
+	# remove if also un /usr/lib .. not as preset-all does not care
+	#if ( -l "/usr/lib/systemd/system/sme-server.target.wants/$fi") {
+	#	print "remove $d$fi : also in /usr/lib/systemd/system/sme-server.target.wants/\n";
+	#	unlink "$d$fi";
+	#	next;
+	#}
+	# remove if link is not to an existing file # we should also check if pointing to an authorized path!
+        my $multiple = $fi;
+        ($multiple = $fi ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $fi =~ /@/ );
+	my $absFilePath = abs_path("$d$fi") ;
+	if ( ! -f "$absFilePath" or ( ! -f "/etc/systemd/system/$fi" and ! -f "/usr/lib/systemd/system/$fi" and ! -f "/usr/lib/systemd/system/$multiple") ) {
+		print "remove $d$fi target '$absFilePath' does not exist or is not regular file in expected path\n";	
+		unlink "$d$fi";
+		next;
+	}
+        # is not enable in preset : remove
+        #print "==$fi \n";
+        if ( ! defined $services{$fi} or $services{$fi} ne "enable") {
+                print "remove $d$fi as not enabled in preset\n";
+                unlink "$d$fi";
+		next;
+        }
+	# if not wanted remove
+	unless ( /^$fi$/ ~~ @WantedBy) {
+		print "remove $d$fi as not declared as WantedBy or in Wants for sme-server.target\n";
+		unlink "$d$fi";
+	}
+}
+
+# and we add wanted enabled services 
+# we only do it for sme-server.target, ignoring the remaining of WantedBy
+foreach my $service (sort keys %services) {
+	my $wanted= "not";
+	$wanted = "want" if (  /^$service$/ ~~ @WantedBy ); 
+	my $status = $services{$service};
+	my $linkedU = ( -e "/usr/lib/systemd/system/sme-server.target.wants/$service" ) ? "linked" : "not";
+	my $linkedE = ( -e "/etc/systemd/system/sme-server.target.wants/$service" ) ? "linked" : "not"; 
+	my $linkedD = ( -e "/etc/systemd/system/default.target.wants/$service" or -e "/usr/lib/systemd/system/default.target.wants/$service" ) ? "linked" : "not"; 
+	## adding link if needed in /etc/systemd/system/sme-server.target.wants
+	## readd event if present in usr/lib as preste-all does not care about that.
+	if ( $status eq "enable" and $linkedE eq "not" and $linkedD eq "not"  and $wanted eq "want" and ( $service !~ /\@\.service$/ ) ){
+		#print "systemctl add-wants sme-server.target $service\n";
+		`/usr/bin/systemctl add-wants sme-server.target $service `;
+	}
+}
+
+# do something about /usr/lib/systemd/system/sme-server.target.wants/
+# we check for rpm owned and not rpm owned
+# we only inform there, we do not do anything else
+$d = "/usr/lib/systemd/system/sme-server.target.wants/";
+opendir $dir, "$d" or die "Cannot open directory: $!";
+@dirfiles = readdir $dir;
+closedir $dir;
+foreach my $fi (@dirfiles) {
+        # we ignore . and ..
+        next if $fi =~ /\.+$/;
+        # for the moment we only consider service  files and ignore target, mount, device, socket...
+        next unless ($fi =~ /.service$/);
+        # remove if file but not a link
+        print "$d$fi is not a link\n" unless ( -l "$d$fi");
+        # remove if link is not to an existing file
+        my $absFilePath = abs_path("$d$fi") ;
+        print "$d$fi target '$absFilePath' does not exist or is not regular file\n" unless ( -f "$absFilePath");
+        # check if owned by rpm
+	my $rpmowned = `rpm -qf $d$fi`;
+	chomp $rpmowned;
+	if ($rpmowned ne "" ) {
+		#print "$d$fi is owned by $rpmowned\n";
+		#next;
+	} else {
+		print "$d$fi has been manually added\n";
+	}
+	if ( ! defined $services{$fi} or $services{$fi} ne "enable") {
+                print "$d$fi is not enabled in preset\n";
+        }
+        # if not wanted remove
+	# need to check its own files also here
+	my $service = $fi;
+	my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* -rsh` ;
+	chomp $wanted;
+        #unless (  /^$fi$/ ~~ @WantedBy  ) {
+        unless (grep(/^$fi$/, @WantedBy  ) ) {
+                print "$d$fi is not declared as WantedBy or in Wants for sme-server.target\n";
+        }
+}
+

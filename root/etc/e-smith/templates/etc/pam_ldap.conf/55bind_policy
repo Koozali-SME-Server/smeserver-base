@@ -1,0 +1,4 @@
+{
+# Allow read /etc/{passwd,groups,shadow} files when ldap is down.
+}
+bind_policy soft

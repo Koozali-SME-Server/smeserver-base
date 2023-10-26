@@ -1,0 +1,17 @@
+{
+    my @dnsserv;
+    my $dnscustom = $DB->get_prop('dhcpd', 'dnscustom') || 'disabled';
+    if ( $dnscustom eq 'enabled') {
+    	push @dnsserv,$DB->get_prop('dhcpd', 'dns1server') if $DB->get_prop('dhcpd', 'dns1server') && $DB->get_prop('dhcpd', 'dns1server') ne "";
+    	push @dnsserv,$DB->get_prop('dhcpd', 'dns2server') if $DB->get_prop('dhcpd', 'dns2server') && $DB->get_prop('dhcpd', 'dns2server') ne "";
+    	push @dnsserv,$DB->get_prop('dhcpd', 'dns3server') if $DB->get_prop('dhcpd', 'dns3server') && $DB->get_prop('dhcpd', 'dns3server') ne "";
+	}
+    # force our own dhcp server unless there is already 2 or more
+    push @dnsserv,$LocalIP unless ( scalar(@dnsserv) >=2) ;
+    # remove duplicates, so you can put twice the same to avoid our own dhcp server 
+    # most clients support up to 3 dns server or ignore the third one
+    @dnsserv= do { my %seen; grep { !$seen{$_}++ }  @dnsserv};
+
+    $OUT = "    option domain-name-servers  ". join(",", @dnsserv) .";";
+}
+

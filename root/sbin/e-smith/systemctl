@@ -1,0 +1,180 @@
+#!/bin/bash
+#systemctl wrapper fo Koozali SME Server 
+
+allargs=$@
+opts=();
+syscommand="";
+sysunit=""
+debug=$(/sbin/e-smith/config get debug || echo "false")
+if [ "$debug" != "true" ]; then debug=false;fi
+
+# short OPTIONS we must pay attention as they have more arguments
+#-t, --type=
+#-s, --signal=
+#-p, --property=
+#-o, --output=
+#-n, --lines=
+#-H, --host=
+#-M, --machine=
+
+#commands we should return directly to systemd
+#list-units,list-sockets,list-timers,is-active,is-failed,status,show,cat,set-property,help,reset-failed,list-dependencies,
+#list-unit-files,is-enabled,get-default,set-default
+#list-machines
+#list-jobs
+#snapshot,delete
+#show-environment,set-environment,unset-environment,import-environment
+#daemon-reload,daemon-reexec
+#is-system-running,default,rescue,emergency,halt,poweroff,reboot,kexec,switch-root,suspend,hibernate,hybrid-sleep
+
+# This is a list of commands :
+# -we want to handle ourself or 
+# -we need to translate for systemd or
+# -we do not want admin uses against the SME Server
+#
+# commands we handle: start,stop,reload,restart,try-restart,reload-or-restart,reload-or-try-restart,isolate,kill
+#		      enable,disable,reenable,preset,preset-all,mask,unmask,link,add-wants,edit
+# commands we deactivate/hide : mask,unmask,link,add-wants,edit set-default 
+# not systemd but we might use them : adjust sigterm sighup sigusr1 sigusr2
+filteredcommands=(start stop reload restart try-restart reload-or-restart reload-or-try-restart isolate kill enable disable reenable preset preset-all adjust sigterm sighup sigusr1 sigusr2 mask unmask link add-wants add-requires edit set-default );
+
+# fucntion to check if this is a command we want
+contains2 () {
+    local seeking=$1
+    local in=0
+    for element in "${filteredcommands[@]}"; do
+        if [[ $element == "$seeking" ]]; then
+            in=1
+            break
+        fi
+    done
+    return $in
+}
+
+# if no args we return to systemcl
+if [ $# -eq 0 ]; then 
+	echo "we return to systemctl"
+	/usr/bin/systemctl
+	exit
+fi
+
+#parse args
+while [ "$#" -gt 0 ]; do
+        case "$1" in
+	    -p|-t|-s|-o|-n|H|-M) temp=$1; shift ; opts+=("$temp $1");  ;;
+            --*) opts+=("$1")  ;;
+            -*) opts+=("$1")   ;;
+            *)  if [[ "$syscommand" == "" ]]; then  syscommand="$1" ; else sysunit="$1"; fi   ;;
+        esac
+        shift
+done
+
+servicename=${sysunit%".service"}
+
+#we return to systemd systemctl command unless this is one of the command we want to handle
+if ( contains2 "$syscommand" ) ; then
+	($debug) && echo "we return to /usr/bin/systemctl ${allargs[*]}"
+	/usr/bin/systemctl ${allargs[*]}
+ 	exit
+fi
+
+
+# here we convert sig* to kill -s=SIG* or SME commant to ones systemd recognize
+case "$syscommand" in 
+	adjust|sighup|sigusr1|sigusr2)
+		$syscommand="reload-or-restart";
+		;;
+	sigterm)
+		$syscommand="restart";
+		;;
+esac
+
+
+# catch here non unit signals, or ones we would like to do something different
+#enable disable reenable preset preset-all
+#mask unmask link add-wants edit
+case "$syscommand" in
+	preset-all)
+		($debug) && echo "We do /etc/e-smith/events/actions/systemd-default"
+		/etc/e-smith/events/actions/systemd-default
+		exit
+		;;
+	preset)
+		# TODO looking if we could use /etc/e-smith/events/actions/systemd-default none $servicename
+		($debug) && echo "We do /etc/e-smith/events/actions/systemd-default"
+		/etc/e-smith/events/actions/systemd-default
+	        exit
+		;;
+	enable|disable|reenable)
+                # looking if we could use 
+		newstatus="enabled"
+		todo="enable"
+		if [ $syscommand == "disable" ]; then newstatus="disabled";todo="disable" ; fi
+		/sbin/e-smith/config setprop $servicename status $newstatus
+		#/etc/e-smith/events/actions/systemd-default none $servicename
+		# TODO looking if we could do it only for the service would be great!
+		($debug) && echo "We do /etc/e-smith/events/actions/systemd-default"
+		($debug) && echo "/usr/bin/systemctl $todo $sysunit ${opts[*]}"	
+		/etc/e-smith/events/actions/systemd-default
+		/usr/bin/systemctl $todo $sysunit ${opts[*]}
+                exit
+		;;
+	set-default |isolate)
+		echo "We only $syscommand against sme-server.target"
+		($debug) && echo "/etc/e-smith/events/actions/systemd-default"
+		($debug) && echo "/etc/e-smith/events/actions/systemd-isolate"
+		/etc/e-smith/events/actions/systemd-default
+		/etc/e-smith/events/actions/systemd-isolate
+		;;
+	link|mask|unmask|add-wants|add-requires|edit)
+		echo "Please, do not use $syscommand for Koozali SME Server"
+	        exit
+		;;
+esac
+
+
+#check the unit exist or fails : we do not care systemctl will do this...
+
+# here we check if in db and if enabled or disabled
+# if not or not service = return to systemctl directly
+stype=$(/sbin/e-smith/db configuration gettype $servicename || echo "none")
+sstatus=$(/sbin/e-smith/db configuration getprop $servicename status || echo "disabled")
+if [ $stype == "none" ] ; then
+	# not defined in db, we redirect
+	echo "Information: $sysunit is not defined in configuration DB."
+	($debug) && echo "/usr/bin/systemctl ${allargs[*]}"
+	/usr/bin/systemctl ${allargs[*]}
+	exit
+elif [ $stype != "service" ] ; then
+	echo "Information: $sysunit is not defined as a service in configuration DB but $type"
+	($debug) && echo "/usr/bin/systemctl ${allargs[*]}"
+	/usr/bin/systemctl ${allargs[*]}
+	exit
+elif [ $sstatus == "disabled" ]; then
+	echo "Information: $sysunit is $sstatus in configuration DB."	
+	# we might want to simply stop
+	#/usr/bin/systemctl stop $sysunit 
+	# but we will do what we were asked for
+	($debug) && echo "/usr/bin/systemctl ${allargs[*]}"
+	/usr/bin/systemctl ${allargs[*]} 
+	exit
+elif [ $sstatus == "enabled" ]; then
+	#echo "$sstatus" 
+	# starting in case
+	#systemctl is-active -q $sysunit will return zero if active; non zero if not
+	#/usr/bin/systemctl is-active -q $sysunit || /usr/bin/systemctl start $sysunit
+	# now executing the command
+	($debug) && echo "/usr/bin/systemctl $syscommand $sysunit ${opts[*]}"
+	/usr/bin/systemctl $syscommand $sysunit ${opts[*]}
+	exit
+fi 
+
+
+
+
+
+echo "if you see that, we missed something, report the command to https://bugs.koozali.org"
+echo "options : " ${opts[*]};
+echo "command : " $syscommand;
+echo "unit :" $sysunit;
+echo $@

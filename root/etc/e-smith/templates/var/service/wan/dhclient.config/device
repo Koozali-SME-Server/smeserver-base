@@ -1,0 +1,5 @@
+{
+    my $device = $ExternalInterface{Name} || "eth1";
+    $OUT .= "/sbin/ifconfig $device up mtu 1500\n\n";
+    $OUT .= "interface=$device\n";
+}

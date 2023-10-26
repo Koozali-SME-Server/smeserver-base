@@ -1,0 +1,4 @@
+{
+# Save news errors of level crit and higher in a special file.
+}
+uucp,news.crit						{ "${spooler}" }

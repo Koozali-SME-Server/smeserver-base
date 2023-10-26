@@ -1,0 +1,11 @@
+{
+$rotate=$rsyslog{'RotateDays'} || 7;
+$purge=$rsyslog{'PurgeLength'} || 95;
+$OUT.="#Remove rotated logs older than <count> days.
+maxage $purge\n\n";
+$total=$rsyslog{'KeepNumber'} || sprintf("%.0f",$purge/$rotate)||4;
+$OUT.="# keep n weeks worth of backlogs
+rotate $total\n";
+}
+maxsize {$rsyslog{'MaxSize'} || "100M";}
+

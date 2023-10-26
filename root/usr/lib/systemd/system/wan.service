@@ -1,0 +1,16 @@
+[Unit]
+Description=WAN interface for Koozali SME Server
+After=network-pre.target networking.service
+Before=network-online.target
+PartOf=networking.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/sbin/e-smith/service-status wan
+ExecStart=/usr/bin/sv u /service/wan
+ExecStop=/usr/bin/sv stop  /service/wan
+ExecReload=/usr/bin/sv t /service/wan
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sme-server.target

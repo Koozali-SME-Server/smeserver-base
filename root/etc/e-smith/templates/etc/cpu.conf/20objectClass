@@ -1,0 +1,15 @@
+{
+if ($ACCOUNT eq 'system'){
+    $OUT .= "USER_OBJECT_CLASS = " . join(",",@systemUserObjectClass) . "\n";
+    $OUT .= "GROUP_OBJECT_CLASS = " . join(",",@systemGroupObjectClass) . "\n";
+}
+else{
+    $OUT .= "USER_OBJECT_CLASS  = " . join(",",@userObjectClass) . "\n";
+    $OUT .= "GROUP_OBJECT_CLASS = " . join(",",@groupObjectClass) . "\n";
+
+}
+
+$OUT .= "USER_BASE = ou=Users," . esmith::util::ldapBase ($DomainName) . "\n";
+$OUT .= "GROUP_BASE = ou=Groups," . esmith::util::ldapBase ($DomainName) ."\n";
+
+}

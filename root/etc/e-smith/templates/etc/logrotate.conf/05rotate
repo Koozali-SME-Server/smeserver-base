@@ -1,0 +1,10 @@
+# see "man logrotate" for details
+# rotate log files weekly
+{
+#daily, weekly, monthly
+$rotate=$rsyslog{'RotateDays'} || '7';
+$OUT="weekly" ;
+$OUT="monthly" if ( $rotate > 21 );
+$OUT="daily" if ( $rotate == 1 );
+}
+

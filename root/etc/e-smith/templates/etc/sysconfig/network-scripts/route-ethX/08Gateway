@@ -1,0 +1,7 @@
+{
+    return "" unless (defined $GatewayIP && (
+                        ($SystemMode eq 'serveronly' && $InternalInterface{Name} eq $THIS_DEVICE ) ||
+                        ($ExternalInterface{Name} eq $THIS_DEVICE) ));
+    $OUT .= "$GatewayIP dev $THIS_DEVICE\n";
+    $OUT .= "default via $GatewayIP dev $THIS_DEVICE\n";
+}

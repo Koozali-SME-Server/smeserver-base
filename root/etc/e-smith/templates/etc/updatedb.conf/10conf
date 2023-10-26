@@ -1,0 +1,7 @@
+
+#  /etc/updatedb.conf
+
+# Sample configuration file for updatedb(8).  See man 5 updatedb.conf
+PRUNEFS = "auto afs gfs gfs2 iso9660 sfs udf {$PRUNEFS}"
+PRUNEPATHS = "/afs /media /net /sfs /tmp /udev /var/spool/cups /var/spool/squid /var/tmp {$PRUNEPATHS}"
+

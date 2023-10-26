@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+
+#----------------------------------------------------------------------
+# copyright (C) 1999-2005 Mitel Networks Corporation
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 		
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 		
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+# 
+# Technical support for this program is available from Mitel Networks 
+# Please visit our web site www.mitel.com/sme/ for details.
+#----------------------------------------------------------------------
+
+package esmith;
+
+use strict;
+use Errno;
+use esmith::ConfigDB;
+
+my $conf = esmith::ConfigDB->open_ro
+    or die "Could not open Config DB";
+
+my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
+my $x = 0; # exit value
+
+my $event = $ARGV [0];
+my $groupName = $ARGV [1] or die "Groupname argument missing.";
+
+if ($ldapauth ne 'enabled')
+{
+    system("/usr/sbin/userdel", "$groupName") == 0
+        or ( $x = 255, warn "Failed to delete dummy user for (unix) group $groupName.\n" );
+
+    system("/usr/sbin/groupdel", "$groupName") == 0
+        or ( $x = 255, warn "Failed to delete (unix) group $groupName.\n" );
+}
+
+system("/usr/sbin/cpu", "-C/etc/cpu-system.conf", "userdel", "$groupName") == 0
+    or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete dummy user for (ldap) group $groupName.\n" );
+
+system("/usr/sbin/cpu", "groupdel", "$groupName") == 0
+    or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete (ldap) group $groupName.\n" );
+
+exit ($x);

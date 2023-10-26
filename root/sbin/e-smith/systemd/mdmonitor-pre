@@ -1,0 +1,10 @@
+#!/bin/sh
+count=$(sed -n '/[0-9]\s\+[^ ]\+[^0-9]$/p;/[0-9]\s\+\(rd\|ida\|cciss\|i2o\)\/[^ ]\+[^0-9p][0-9]\+$/p' /proc/partitions | wc -l)
+if [ $count -ge 2 ]
+then
+        exit 0
+else
+        echo "Only $count drive(s) in this system - disabling raid monitoring"
+        exit 1
+fi
+

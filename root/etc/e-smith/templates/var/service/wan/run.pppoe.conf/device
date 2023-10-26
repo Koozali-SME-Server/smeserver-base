@@ -1,0 +1,8 @@
+{
+    my $device = $pppoe{PhysicalInterface} || "eth1";
+    $OUT .= "/sbin/ifconfig $device up mtu 1500\n";
+    $OUT .= "/sbin/modprobe ppp_generic\n";
+    $OUT .= "/sbin/modprobe ppp_async\n";
+    $OUT .= "/sbin/modprobe ppp_synctty\n";
+    $OUT .= "DEVICE=$device";
+}

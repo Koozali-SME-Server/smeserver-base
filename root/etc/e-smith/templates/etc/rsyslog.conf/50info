@@ -1,0 +1,6 @@
+{
+# Log anything (except mail) of level info or higher.
+# Don't log private authentication messages!
+}
+*.info;mail.none;authpriv.none;cron.none		{ "${messages}" }
+

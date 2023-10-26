@@ -1,0 +1,724 @@
+#!/usr/bin/perl -w
+
+use esmith::Build::CreateLinks  qw(:all);
+
+templates2events("/etc/sysconfig/i18n", qw(post-install post-upgrade e-smith-base-update));
+
+templates2events("/etc/selinux/config", qw(post-install post-upgrade e-smith-base-update));
+
+templates2events("/etc/systemd/system-preset/49-koozali.preset", qw(post-install post-upgrade e-smith-base-update console-save bootstrap-console-save bootstrap-ldap-save));
+
+# give the correct configuration file of dhcpd.conf 
+templates2events("/etc/dhcp/dhcpd.conf", qw(bootstrap-console-save e-smith-base-update));
+
+# ppp-conf-users
+
+foreach (qw(pap-secrets chap-secrets))
+{
+    templates2events("/etc/ppp/$_", qw(
+	    bootstrap-console-save
+	    console-save
+	    remoteaccess-update
+	    e-smith-base-update));
+}
+
+foreach (qw(
+	/var/service/wan/pppoe.pppd.conf
+	/var/service/wan/run.pppoe.conf
+	/etc/ppp/ip-down.local
+	/etc/ppp/ip-up.local
+    ))
+{
+    templates2events("$_", qw(
+	console-save
+	bootstrap-console-save
+	e-smith-base-update
+	));
+}
+
+# conf-dialup
+foreach (qw(
+    /etc/sysconfig/network-scripts/ifcfg-ppp0
+    /etc/sysconfig/network-scripts/chat-ppp0
+    /etc/ppp/ip-up.local
+    /etc/ppp/ip-down.local
+    /etc/diald.conf
+    /etc/diald.filter
+    /etc/diald/link
+    /var/service/ippp/config
+    /etc/ppp/ioptions
+    ))
+{
+    templates2events($_, qw(console-save bootstrap-console-save e-smith-base-update));
+}
+
+# conf-networking
+
+foreach (qw(
+    /etc/sysconfig/network-scripts/ifcfg-bond0
+    /etc/modprobe.d/bonding.conf
+    /etc/sysconfig/network
+    /etc/nsswitch.conf
+    /etc/HOSTNAME
+    /etc/hosts
+    /etc/resolv.conf
+    /etc/sysctl.conf
+    /var/service/wan/dhclient.config
+    ))
+{
+    templates2events($_, qw(console-save bootstrap-console-save e-smith-base-update));
+}
+event_link("update-ifcfg", "console-save", "05");
+event_link("update-ifcfg", "bootstrap-console-save", "05");
+
+# conf-other
+
+templates2events("/etc/crontab",  qw(
+	console-save
+	bootstrap-console-save
+	post-install
+	post-upgrade
+	email-update
+	logrotate
+	e-smith-base-update
+	));
+templates2events("/etc/mime.types",  qw(
+	console-save
+	bootstrap-console-save
+	post-install
+	post-upgrade
+	email-update
+	logrotate
+	e-smith-base-update
+	));
+templates2events("/etc/sysconfig/rsyslog",  qw(
+	console-save
+	bootstrap-console-save
+	post-install
+	post-upgrade
+	email-update
+	logrotate
+	e-smith-base-update
+	));
+templates2events("/etc/rsyslog.conf",  qw(
+	console-save
+	bootstrap-console-save
+	post-install
+	post-upgrade
+	email-update
+	logrotate
+	e-smith-base-update
+	));
+templates2events("/etc/logrotate.conf",  qw(
+        console-save
+        bootstrap-console-save
+        post-install
+        post-upgrade
+        email-update
+        logrotate
+        e-smith-base-update
+        ));
+templates2events("/etc/systemd/journald.conf",  qw(
+        console-save
+        bootstrap-console-save
+        post-install
+        post-upgrade
+        email-update
+        logrotate
+        e-smith-base-update
+        ));
+templates2events("/etc/updatedb.conf", qw(
+	bootstrap-console-save
+	e-smith-base-update
+));
+templates2events("/etc/openssl.conf",  qw(
+        console-save
+        bootstrap-console-save
+        post-install
+        post-upgrade
+	domain-create
+	domain-delete
+	network-create
+	network-delete
+        ip-change
+	e-smith-base-update
+        ));
+
+# conf-routes
+event_link("update-ifcfg", "network-create", "05");
+event_link("update-ifcfg", "network-delete", "05");
+
+# conf-security
+
+templates2events("/etc/securetty", qw(
+	console-save
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	ibay-modify
+	ibay-modify-servers
+	network-create
+	network-delete
+	ip-change
+	email-update
+	remoteaccess-update
+	e-smith-base-update
+	));
+templates2events("/etc/services", qw(
+	console-save
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	ibay-modify
+	ibay-modify-servers
+	network-create
+	network-delete
+	ip-change
+	email-update
+	remoteaccess-update
+	e-smith-base-update
+	));
+templates2events("/etc/shells", qw(
+	console-save
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	ibay-modify
+	ibay-modify-servers
+	network-create
+	network-delete
+	ip-change
+	email-update
+	remoteaccess-update
+	e-smith-base-update
+	));
+templates2events("/etc/hosts.deny", qw(
+	console-save
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	ibay-modify
+	ibay-modify-servers
+	network-create
+	network-delete
+	ip-change
+	email-update
+	remoteaccess-update
+	e-smith-base-update
+	));
+templates2events("/etc/hosts.allow", qw(
+	console-save
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	ibay-modify
+	ibay-modify-servers
+	network-create
+	network-delete
+	ip-change
+	email-update
+	remoteaccess-update
+	e-smith-base-update
+	));
+foreach my $file (qw(
+        /etc/pam.d/login
+	/etc/pam.d/system-auth
+	/etc/pam.d/passwd
+	/etc/pam.d/pwauth
+	/etc/pam_ldap.conf
+	/etc/pam_ldap.secret
+	/etc/security/pam_abl.conf
+    ))
+{
+    templates2events($file, qw(console-save bootstrap-console-save e-smith-base-update));
+}
+
+foreach (qw(
+       /etc/cpu.conf
+       /etc/cpu-system.conf
+    ))
+{
+    templates2events("$_", qw(
+	post-upgrade
+	console-save
+	bootstrap-console-save
+	ldap-update
+	e-smith-base-update
+	));
+}
+
+# conf-userlists
+
+foreach (qw(users.allow accounts.allow accounts.deny))
+{
+    templates2events("/etc/e-smith/pam/$_", qw(
+	bootstrap-console-save
+	ibay-create
+	ibay-delete
+	user-create
+	user-delete
+	password-modify
+	e-smith-base-update
+	));
+}
+
+# fstab-conf
+
+templates2events("/etc/fstab", qw(post-install post-upgrade e-smith-base-update));
+
+# init-conf
+
+templates2events("/etc/inittab", qw(
+	console-save
+	bootstrap-console-save
+	post-install
+	post-upgrade
+	remoteaccess-update
+	e-smith-base-update
+	));
+
+# lynx-conf
+
+templates2events("/etc/lynx.cfg", qw(console-save bootstrap-console-save e-smith-base-update));
+templates2events("/etc/elinks.conf", qw(bootstrap-console-save e-smith-base-update));
+
+#--------------------------------------------------
+# functions for manager panel
+#--------------------------------------------------
+my $panel = "manager";
+
+panel_link("groups", $panel);
+panel_link("localnetworks", $panel);
+panel_link("online-manual", $panel);
+panel_link("reboot", $panel);
+panel_link("remoteaccess", $panel);
+panel_link("review", $panel);
+panel_link("useraccounts", $panel);
+
+#--------------------------------------------------
+# actions for e-smith-base-update event
+#--------------------------------------------------
+my $event = "e-smith-base-update";
+
+
+event_link("remove-templates-custom", $event, "02");
+templates2events("/etc/smartmontools/smartd.conf", $event);
+templates2events("/home/e-smith/ssl.pem/pem", $event);
+templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
+event_link("systemd-journald", $event, "02");
+event_link("fix-startup", $event, "05");
+event_link("init-accounts", $event, "05");
+event_link("logrotate-migrate", $event, "06");
+event_link("rotate_logfiles", $event, "07");
+event_link("set-hostname", $event, "10");
+event_link("rmmod-bonding", $event, "10");
+event_link("conf-startup", $event, "10");
+event_link("user-lock-passwd", $event, "15");
+event_link("group-modify-unix", $event, "15");
+event_link("user-rsshd", $event, "16");
+event_link("update-passwd", $event, "20");
+event_link("count-active-user-accounts", $event, "25");
+event_link("conf-modules", $event, "30");
+event_link("create-mnt-floppy", $event, "50");
+event_link("ldap-update" , $event, "80");
+event_link("conf-routes", $event, "89");
+event_link("systemd-default", $event, "88");
+event_link("systemd-isolate", $event, "89");
+event_link("systemd-reload", $event, "89");
+event_link("raidmonitor-check", $event, "92");
+
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/network");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/wan");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/dhcpd");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/rsyslog");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/crond");
+
+#--------------------------------------------------
+# actions for console-save event
+#--------------------------------------------------
+my $event = "console-save";
+
+event_link("remove-templates-custom", $event, "02");
+templates2events("/etc/smartmontools/smartd.conf", $event);
+templates2events("/home/e-smith/ssl.pem/pem", $event);
+templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
+event_link("set-hostname", $event, "10");
+event_link("user-rsshd", $event, "16");
+event_link("conf-modules", $event, "30");
+event_link("conf-startup", $event, "60");
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+event_link("raidmonitor-check", $event, "92");
+event_link("reset-unsavedflag", $event, "95");
+
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/wan");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/dhcpd");
+
+#--------------------------------------------------
+# actions for bootstrap-console-save event
+#--------------------------------------------------
+$event = "bootstrap-console-save";
+
+event_link("remove-templates-custom", $event, "02");
+templates2events("/etc/smartmontools/smartd.conf", $event);
+templates2events("/home/e-smith/ssl.pem/pem", $event);
+templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
+event_link("rmmod-bonding", $event, "10");
+event_link("set-hostname", $event, "10");
+event_link("conf-modules", $event, "30");
+event_link("conf-startup", $event, "60");
+event_link("systemd-default", $event, "88");
+event_link("conf-routes", $event, "89");
+event_link("systemd-reload", $event, "89");
+event_link("reset-unsavedflag", $event, "95");
+
+#--------------------------------------------------
+# actions for bootstrap-ldap-save
+#--------------------------------------------------
+$event = "bootstrap-ldap-save";
+
+templates2events("/etc/nsswitch.conf", $event);
+templates2events("/etc/pam.d/system-auth", $event);
+event_link("user-lock-passwd", $event, "15");
+event_link("user-modify-unix", $event, "15");
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+
+#--------------------------------------------------
+# actions for group-create event
+#--------------------------------------------------
+
+$event = "group-create";
+
+event_link("group-create-unix", $event, "04");
+
+#--------------------------------------------------
+# actions for group-delete event
+#--------------------------------------------------
+
+$event = "group-delete";
+
+event_link("group-delete-unix", $event, "15");
+
+#--------------------------------------------------
+# actions for group-modify event
+#--------------------------------------------------
+
+$event = "group-modify";
+
+event_link("group-modify-unix", $event, "15");
+
+#--------------------------------------------------
+# actions for halt event
+#--------------------------------------------------
+
+$event = "halt";
+
+event_link("halt", $event, "70");
+
+#--------------------------------------------------
+# actions for ip-change event
+#--------------------------------------------------
+
+$event = "ip-change";
+
+event_link("set-external-ip", $event, "03");
+#event_link("update-dns", $event, "85");
+
+#--------------------------------------------------
+# actions for network-create event
+#--------------------------------------------------
+
+$event = "network-create";
+
+event_link("conf-routes", $event, "89");
+
+#--------------------------------------------------
+# actions for network-delete event
+#--------------------------------------------------
+
+$event = "network-delete";
+
+event_link("conf-routes", $event, "89");
+
+#--------------------------------------------------
+# actions for post-install event
+#--------------------------------------------------
+
+$event = "post-install";
+
+templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
+event_link("systemd-journald", $event, "02");
+event_link("fix-startup", $event, "05");
+event_link("init-accounts", $event, "05");
+event_link("rotate_logfiles", $event, "07");
+event_link("init-passwords", $event, "10");
+event_link("conf-startup", $event, "10");
+event_link("user-rsshd", $event, "16");
+event_link("conf-modules", $event, "30");
+event_link("create-mnt-floppy", $event, "50");
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+
+#--------------------------------------------------
+# actions for post-upgrade event
+#--------------------------------------------------
+
+$event = "post-upgrade";
+
+event_link("remove-templates-custom", $event, "02");
+templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
+event_link("systemd-journald", $event, "02");
+event_link("fix-startup", $event, "05");
+event_link("init-accounts", $event, "05");
+event_link("logrotate-migrate", $event, "06");
+event_link("rotate_logfiles", $event, "07");
+event_link("conf-startup", $event, "10");
+event_link("user-lock-passwd", $event, "15");
+event_link("group-modify-unix", $event, "15");
+event_link("user-rsshd", $event, "16");
+event_link("update-passwd", $event, "20");
+event_link("count-active-user-accounts", $event, "25");
+event_link("conf-modules", $event, "30");
+event_link("create-mnt-floppy", $event, "50");
+event_link("copy-anaconda-logs", $event, "90");
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+event_link("raidmonitor-check", $event, "92");
+
+#--------------------------------------------------
+# actions for reboot event
+#--------------------------------------------------
+
+$event = "reboot";
+
+safe_symlink("stop", "root/etc/e-smith/events/$event/services2adjust/wan");
+event_link("reboot", $event, "99");
+
+#--------------------------------------------------
+# actions for remoteaccess-update event
+#--------------------------------------------------
+
+$event = "remoteaccess-update";
+
+event_link("remove-templates-custom", $event, "02");
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/dhcpd");
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+
+#--------------------------------------------------
+# actions for user-create event
+#--------------------------------------------------
+
+$event = "user-create";
+
+event_link("user-create-unix", $event, "04");
+event_link("user-rsshd", $event, "16");
+event_link("count-active-user-accounts", $event, "25");
+event_link("user-group-modify", $event, "85");
+
+#--------------------------------------------------
+# actions for user-delete event
+#--------------------------------------------------
+
+$event = "user-delete";
+
+event_link("user-delete-groups-and-pseudonyms", $event, "02");
+event_link("user-delete-unix", $event, "15");
+event_link("initialize-default-databases", $event, "23");
+event_link("count-active-user-accounts", $event, "25");
+
+#--------------------------------------------------
+# actions for user-modify event
+#--------------------------------------------------
+
+$event = "user-modify";
+
+event_link("user-modify-unix", $event, "15");
+event_link("user-rsshd", $event, "16");
+event_link("user-group-modify", $event, "85");
+
+$event = "user-modify-admin";
+
+event_link("user-modify-unix", $event, "15");
+
+#--------------------------------------------------
+# actions for user-lock event
+#--------------------------------------------------
+
+$event = "user-lock";
+
+event_link("user-lock-passwd", $event, "15");
+event_link("count-active-user-accounts", $event, "25");
+
+#--------------------------------------------------
+# actions for password-modify event
+#--------------------------------------------------
+
+$event = "password-modify";
+
+event_link("count-active-user-accounts", $event, "25");
+
+#--------------------------------------------------
+# actions for timeserver-update event
+#--------------------------------------------------
+
+$event = "timeserver-update";
+
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/crond");
+
+#--------------------------------------------------
+# actions for ip-up event
+#--------------------------------------------------
+
+$event = "ip-up";
+
+event_link("set-gateway-ip", $event, "55");
+
+#--------------------------------------------------
+# actions for ip-down event
+#--------------------------------------------------
+
+$event = "ip-down";
+
+event_link("isdn-down-notify", $event, "50");
+
+#--------------------------------------------------
+# actions for logrotate event
+#--------------------------------------------------
+
+$event = "logrotate";
+
+event_link("logrotate-migrate", $event, "06");
+event_link("rotate_logfiles", $event, "07");
+event_link("purge-old-logs", $event, "75");
+
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/rsyslog");
+
+#--------------------------------------------------
+# actions for local event
+#--------------------------------------------------
+
+$event = "local";
+safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/rc-local");
+
+#--------------------------------------------------
+# actions for ldap-update event
+#--------------------------------------------------
+
+$event = "ldap-update";
+
+templates2events("/home/e-smith/ssl.pem/pem", $event);
+
+#--------------------------------------------------
+# actions for ldap-update event
+#--------------------------------------------------
+
+$event = "ssl-update";
+
+templates2events("/home/e-smith/ssl.pem/pem", $event);
+
+
+#--------------------------------------------------
+# actions for email-update event:
+# email parameters have been changed in the e-smith
+# manager; update system security, rewrite email config
+# files, configure other system files (crontab is the
+# important one), and restart server
+#--------------------------------------------------
+$event = "email-update";
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+
+#--------------------------------------------------
+# actions for webapps-update event
+#--------------------------------------------------
+
+$event = "webapps-update";
+event_link("systemd-default", $event, "88");
+event_link("systemd-reload", $event, "89");
+
+
+# Set up links to daemontools.
+
+safe_symlink("run.dhclient", "root/var/service/wan/run.DHCPHostname");
+safe_symlink("run.dhclient", "root/var/service/wan/run.DHCPEthernetAddress");
+
+
+# no template headers for /etc/pam_ldap.secret
+safe_touch("root/etc/e-smith/templates/etc/pam_ldap.secret/template-begin");
+
+
+foreach my $target (qw(multi-user sme-server))
+{
+system('mkdir -p root/usr/lib/systemd/system/'.$target.'.target.wants/');
+        unlink "root/usr/lib/systemd/system/$target.target.wants/bootstrap-console.service";
+
+foreach my $unit (qw(
+	dbus.service 
+	getty.target 
+	plymouth-quit.service 
+	plymouth-quit-wait.service 
+	systemd-ask-password-wall.path 
+	systemd-logind.service
+	systemd-update-utmp-runlevel.service
+	systemd-user-sessions.service
+	networking.service
+	mdmonitor.service
+	))
+	{
+	symlink("../$unit",
+                "root/usr/lib/systemd/system/$target.target.wants/$unit")
+        or die "Can't symlink to root/usr/lib/systemd/system/$target.target.wants/$unit: $!";
+	}
+}
+
+foreach my $target (qw(halt reboot shutdown))
+{
+	$unit="bootstrap-fix.service";
+	safe_symlink("../$unit", "root/usr/lib/systemd/system/$target.target.wants/$unit");
+}
+
+$unit="bootstrap-console.service";
+$target="basic";
+symlink("../$unit",
+        "root/usr/lib/systemd/system/$target.target.wants/$unit")
+        or die "Can't symlink to root/usr/lib/systemd/system/$target.target.wants/$unit: $!";
+
+symlink("mdmonitor.service",
+                "root/usr/lib/systemd/system/raidmonitor.service");
+
+# languages links
+foreach (qw(fr-be fr-lu fr-mc fr-ch))
+{
+	safe_symlink("fr", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(en-bz en-ca en-ie en-in en-jm en-my en-ph en-sg en-tt en-za en-zw))
+{
+        safe_symlink("en-us", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(es-ar es-bo es-cl es-co es-cr es-do es-ec es-es es-gt es-hn es-mx es-ni es-pa es-pe es-pr es-py es-sv es-us es-uy es-ve))
+{
+        safe_symlink("es", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(de-at de-ch de-de de-li de-lu))
+{
+        safe_symlink("de", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(it-ch it-it))
+{
+	safe_symlink("it", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(ro-ro ro-md))
+{
+        safe_symlink("ro", "root/etc/e-smith/locale/$_");
+}
+foreach (qw(sv-fi sv-se))
+{
+	safe_symlink("sv", "root/etc/e-smith/locale/$_");
+}
+safe_symlink("zh-tw", "root/etc/e-smith/locale/zh-hk");
+
+
+# sme-server.target.d links
+safe_symlink("/etc/e-smith/templates/etc/systemd/system-preset/49-koozali.preset/05config", "root/etc/e-smith/templates/usr/lib/systemd/system/sme-server.target.d/50koozali.conf/05config");

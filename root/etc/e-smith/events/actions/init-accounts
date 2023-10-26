@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+#----------------------------------------------------------------------
+# copyright (C) 1999-2003 Mitel Networks Corporation
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 		
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 		
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+# 
+# Technical support for this program is available from Mitel Networks 
+# Please visit our web site www.mitel.com/sme/ for details.
+#----------------------------------------------------------------------
+package esmith;
+
+use strict;
+use Errno;
+use esmith::util;
+use esmith::ConfigDB;
+
+my $conf = esmith::ConfigDB->open_ro
+    or die "Could not open Config DB";
+
+#create the group apache if doesn't exist
+system(qw(/usr/sbin/groupadd -g 102 -r -o -f apache))
+    unless getgrnam("apache");
+  
+# create the user apache if doesn't exist and has not the same uid/gid as www
+if ( !getpwnam("apache") )
+{
+    die "Error creating apache user or group" unless (
+        system(qw(/usr/sbin/useradd -u 102 -g 102 -o -c 'Apache' -d /var/www -M -s /bin/nologin apache)) == 0);
+}
+
+#set apache gid if different of 102
+my $apachegidtest = getgrnam("apache");
+if ( $apachegidtest != '102' )
+{
+    die "Error changing apache gid" unless (
+        system(qw(/usr/sbin/groupmod -g 102 -o apache)) == 0);
+}
+
+#set apache uid if different of 102
+my $apacheuidtest = getpwnam("apache");
+if ( $apacheuidtest != '102' )
+{
+    die "Error changing apache uid " unless (
+        system(qw(/usr/sbin/usermod -u 102 -g 102 -o apache )) == 0);
+}
+
+
+# fix permissions for www and apache
+# horde does not use www / apache anymore
+#warn "failed to fix permissions for www" unless (
+#     system("/bin/rpm --setugids horde 2> /dev/null") == 0
+#     );
+#     system("/bin/rpm --setperms horde 2> /dev/null") == 0
+#     );
+
+#order is essential there: --setugids then --setperms, or suid guid perms will be lost
+warn "failed to fix user group ids for apache" unless (
+     system("/bin/rpm --setugids httpd mod_auth_tkt mod_ssl php pwauth 2> /dev/null") == 0
+     );
+warn "failed to fix permissions for apache" unless (
+     system("/bin/rpm --setperms httpd mod_auth_tkt mod_ssl php pwauth 2> /dev/null") == 0
+     );
+
+# delete unwanted user accounts
+foreach my $user (qw(halt shutdown sync))
+{
+    `/usr/sbin/userdel $user` if getpwnam($user);
+}
+
+
+exit (0);

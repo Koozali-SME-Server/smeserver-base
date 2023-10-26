@@ -1,0 +1,36 @@
+#!/bin/bash
+#----------------------------------------------------------------------
+# copyright (C) 2013-2023 Koozali Foundation
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#               
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#               
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+# 
+#----------------------------------------------------------------------
+
+#exit if nothing to handle raid is installed
+if [ ! -e /usr/sbin/mdadm ] ; then
+  exit 0;
+fi
+# exit if raid is already configured
+if [ -e /etc/mdadm.conf ] ;  then
+  exit 0
+fi
+if [[ $(mdadm  --detail --scan|wc -l) -ge 1 ]] ; then
+  echo "writting available raid array to /etc/mdadm.conf"
+  /usr/sbin/mdadm  --detail --scan > /etc/mdadm.conf
+  # restart if enabled
+  if [[ $(/sbin/e-smith/config getprop raidmonitor status || echo "disabled") == "enabled" ]] ; then
+    /usr/bin/systemctl restart raidmonitor.service
+  fi
+fi

@@ -1,0 +1,10 @@
+{
+
+our @userObjectClass = qw(inetOrgPerson posixAccount shadowAccount);
+our @systemUserObjectClass =qw(account posixAccount shadowAccount);
+our @groupObjectClass = qw(posixGroup mailboxRelatedObject);
+our @systemGroupObjectClass = qw(posixGroup);
+
+$OUT .= "";
+
+}

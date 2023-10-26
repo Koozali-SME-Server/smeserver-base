@@ -1,0 +1,10 @@
+{
+    my $syslog = $DB->get("syslog") or return;
+
+    my $rsyslog = $DB->get("rsyslog") ||
+        $DB->new_record("rsyslog", { type => "service" });
+
+    $rsyslog->merge_props($syslog->props);
+
+    $syslog->delete;
+}

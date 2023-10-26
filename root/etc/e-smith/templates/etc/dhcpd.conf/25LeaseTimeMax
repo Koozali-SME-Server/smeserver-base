@@ -1,0 +1,1 @@
+    max-lease-time              { 7*($DB->get_prop('dhcpd', 'leasetime') || 86400) };

@@ -1,0 +1,39 @@
+#! /usr/bin/perl
+
+use strict;
+use warnings;
+use DirHandle;
+my $d = DirHandle->new("/etc/rc7.d");
+
+my @d =
+    sort { $a->{order} cmp $b->{order} }
+    map { /^S(\d+)([\w\-.]+)/ ; { name => $2 , order => $1 } }
+    grep { /^S/ } $d->read;
+
+my $equivalent = {'oidentd'=> 'identd',
+                'nut'=> 'ups',
+                'raidmonitor' => 'mdmonitor'
+                };
+
+
+foreach my $service (@d)
+{
+my $sv=$service->{'name'};
+next if $sv eq 'bootstrap-console';
+$sv=  $equivalent->{$sv} || $sv;
+foreach (qw(multi-user sme-server))
+{
+  if (-e "/lib/systemd/system/$_.target.wants/$sv.service")
+  {
+    system(qw(systemctl disable), $sv);
+  }
+  elsif (-e "/etc/systemd/system/$_.target.wants/$sv.service")
+  {
+    system(qw(systemctl disable), $sv);
+  }
+  elsif (-e "/etc/init.d/$sv")
+  {
+    my $dropoutput = `/usr/sbin/chkconfig $sv off 2>/dev/null`;
+  }
+}
+}

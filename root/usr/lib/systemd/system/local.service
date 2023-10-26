@@ -1,0 +1,13 @@
+[Unit]
+Description=Local service for Koozali SME Server
+After=network-pre.target networking.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/sbin/e-smith/service-status local
+ExecStartPre=/usr/bin/chmod +x /etc/rc.d/rc.local
+ExecStart=/sbin/e-smith/signal-event local
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sme-server.target

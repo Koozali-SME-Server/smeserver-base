@@ -1,0 +1,1 @@
+    default-lease-time          { $DB->get_prop('dhcpd', 'leasetime') || 86400 };

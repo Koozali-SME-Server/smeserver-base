@@ -1,0 +1,3 @@
+[GLOBAL]
+DEFAULT_METHOD  = ldap
+

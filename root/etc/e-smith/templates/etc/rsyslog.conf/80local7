@@ -1,0 +1,4 @@
+{
+# Save boot messages also to boot.log
+}
+local7.*						{ "${bootlog}" }

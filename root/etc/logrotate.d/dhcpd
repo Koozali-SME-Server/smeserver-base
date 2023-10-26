@@ -1,0 +1,11 @@
+/var/log/dhcpd/current /var/log/dhcpd/dhcpd.log {
+    missingok
+    notifempty
+    create 600 root root
+    su root root 
+    postrotate
+        /usr/bin/systemctl reload-or-try-restart dhcpd 
+    endscript
+}
+
+

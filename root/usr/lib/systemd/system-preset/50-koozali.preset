@@ -1,0 +1,75 @@
+enable sme-server.target
+disable multi-user.target
+disable graphical.target
+
+enable dbus.service
+enable plymouth-quit-wait.service
+enable plymouth-quit.service
+enable systemd-logind.service 
+enable systemd-update-utmp-runlevel.service
+enable systemd-user-sessions.service
+
+enable runit.service
+enable bootstrap-console.service
+enable networking.service
+enable wan.service
+enable masq.service
+enable php-fpm.service
+enable php55-php-fpm.service
+enable php56-php-fpm.service
+enable php70-php-fpm.service
+enable php71-php-fpm.service
+enable php72-php-fpm.service
+enable php73-php-fpm.service
+enable php74-php-fpm.service
+enable php80-php-fpm.service
+enable httpd-e-smith.service
+enable httpd-admin.service
+enable crond.service
+disable dhcpd.service
+enable dnscache.service
+enable dnscache.forwarder.service
+enable dovecot.service
+enable irqbalance.service
+disable isdn.service
+enable lpd.service
+enable ldap.service
+enable ldap.init.service
+enable local.service
+enable yum.service
+disable rc-local.service
+enable mariadb.service
+enable cvm-unix-local.service
+
+
+# need change after deciding service name
+# enable mdmonitor.service
+# enable raidmonitor.service
+
+enable ntpd.service
+disable nut.service
+disable oidentd.service
+disable pptpd.service
+enable qmail.service
+enable qpsmtpd.service
+disable radiusd.service
+enable raidmonitor.service
+enable rsyslog.service
+enable smartd.service
+
+enable smb.service
+enable nmdb.service
+enable smbd.service
+
+disable smtp-auth-proxy.service
+disable spamd.service
+disable sqpsmtpd.service
+disable squid.service
+disable sshd.service
+enable tinydns.service
+disable nut-server.service
+disable nut-monitor.service
+disable ntpdate.service
+disable ftp.service
+disable proftpd.service
+

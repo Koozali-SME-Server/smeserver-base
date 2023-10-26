@@ -1,0 +1,5 @@
+{
+    return "# Bonding is disabled" unless
+        (($InternalInterface{'NICBonding'} || 'disabled') eq 'enabled');
+    $OUT .= "alias bond0 bonding";
+}

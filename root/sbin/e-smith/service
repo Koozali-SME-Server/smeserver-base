@@ -1,0 +1,57 @@
+#! /bin/sh
+# prevent initscript to use systemctl
+export SYSTEMCTL_SKIP_REDIRECT=1
+. /etc/rc.d/init.d/functions
+
+# what is our current runlevel
+runlevel=$(systemctl get-default)
+SERVICE=$1
+USAGE="Usage: service SERVICENAME [ACTION]"
+
+#if no servicename is provided return usage
+if [[ "${SERVICE}" == "" ]]
+then
+   echo ${USAGE} >&2
+   exit
+fi
+
+if [ "$runlevel" = "multi-user.target" ] || [ "$runlevel" = "sme-server.target" ]
+then
+    if ls /etc/rc7.d/S??$1 >/dev/null 2>/dev/null
+    then
+       script=$(ls /etc/rc7.d/S??$1 | head -1)
+       exec $script $2
+
+    elif ls /usr/lib/systemd/system/${SERVICE}.service >/dev/null 2>/dev/null || ls /etc/systemd/system/${SERVICE}.service >/dev/null 2>/dev/null
+    then
+	 if [[ "$2" == "" ]] ; then
+         echo "'$1' requires an action" 1>&2
+         echo ${USAGE} >&2
+         exit
+        elif  [[ $2 == "status" ]] ; then
+         exec /bin/systemctl status -n0 ${SERVICE}
+         exit
+        elif [[ $2 == "start" ]] ; then
+         echo -n  "Starting ${SERVICE}" 2>/dev/null
+        elif [[ $2 == "stop" ]] ; then
+         echo -n  "Stopping ${SERVICE}" 2>/dev/null
+        elif [[ $2 == "restart" ]] ; then
+         echo -n  "Restarting ${SERVICE}" 2>/dev/null
+        else
+         echo -n  "Sending $2 signal to ${SERVICE}" 2>/dev/null
+        fi
+        /bin/systemctl $2 ${SERVICE}.service> /dev/null
+        if [ $? -ne 0 ]; then
+         echo_failure
+        else
+         echo_success
+        fi
+        echo
+        exit
+    fi
+
+    echo "'$1' is not a valid service name" 1>&2
+    exit 1
+else
+    exec /sbin/service "$@"
+fi

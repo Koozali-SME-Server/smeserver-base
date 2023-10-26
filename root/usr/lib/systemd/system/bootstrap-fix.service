@@ -1,0 +1,13 @@
+[Unit]
+Description=SME server bootup fix
+DefaultDependencies=no
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/root
+ExecStart=/etc/e-smith/events/actions/systemd-default
+Type=oneshot
+
+[Install]
+WantedBy=basic.target reboot.target shutdown.target halt.target
+

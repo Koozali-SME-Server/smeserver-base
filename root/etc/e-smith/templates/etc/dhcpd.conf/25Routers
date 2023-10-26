@@ -1,0 +1,21 @@
+{
+
+    my $dhcpgatewaycustom = $DB->get_prop('dhcpd', 'gatewaycustom');
+    my $dhcpgateway= $DB->get_prop('dhcpd', 'gateway')||'disabled';
+	if ($dhcpgatewaycustom eq 'enabled')
+	{
+		$OUT .= "    option routers $dhcpgateway;";
+	}
+	else
+	{
+    		my $router = (defined $SystemMode && $SystemMode =~ /servergateway/)
+		  ? $LocalIP :
+	    	  defined $GatewayIP ? $GatewayIP : undef;
+		
+    	  	$OUT = "";
+    		if ($router)
+    		{
+        		$OUT .= "    option routers $router;";
+    		}
+	}
+}

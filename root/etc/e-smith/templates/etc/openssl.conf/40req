@@ -1,0 +1,10 @@
+[ req ]
+default_bits            = {$KeySize}
+prompt 			= no
+default_md 		= sha256
+default_keyfile         = {$key}
+distinguished_name      = req_distinguished_name
+attributes              = req_attributes
+x509_extensions		= v3_ca
+req_extensions		= v3_req
+

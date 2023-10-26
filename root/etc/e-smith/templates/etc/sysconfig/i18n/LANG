@@ -1,0 +1,11 @@
+{
+    $OUT = "";
+    my $lang = $settings{LANG};
+    return unless defined $lang;
+    $lang =~ s/^['"]//;
+    $lang =~ s/['"]$//;
+    if ($lang !~ /\.UTF\-8$/)
+    {   
+        $settings{LANG} = '"' . $lang . '.UTF-8"';
+    }
+}

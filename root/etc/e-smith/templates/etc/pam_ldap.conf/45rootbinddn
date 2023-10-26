@@ -1,0 +1,3 @@
+{
+    $OUT .= "rootbinddn cn=root," . esmith::util::ldapBase ($DomainName);
+}

@@ -1,0 +1,156 @@
+#!/usr/bin/perl -w
+#----------------------------------------------------------------------
+# copyright (C) 1999-2005 Mitel Networks Corporation
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 		
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 		
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+#----------------------------------------------------------------------
+package esmith;
+
+use strict;
+use Errno;
+use esmith::AccountsDB;
+use esmith::ConfigDB;
+use Net::LDAP;
+use esmith::util;
+
+my $conf = esmith::ConfigDB->open or die "Could not open configuration db";
+
+my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
+my $x = 0; # exit value
+
+my $domain = $conf->get('DomainName')
+    || die("Couldn't determine domain name");
+$domain = $domain->value;
+
+# prepare LDAP bind
+my $pw = esmith::util::LdapPassword();
+my $base = esmith::util::ldapBase ($domain);
+
+my $ldap = Net::LDAP->new('localhost')
+    or die "$@";
+
+$ldap->bind(
+    dn => "cn=root,$base",
+    password => $pw
+);
+
+my $event = $ARGV [0];
+my $userName = $ARGV [1];
+
+#------------------------------------------------------------
+# Check the Unix account
+#------------------------------------------------------------
+
+
+my $a = esmith::AccountsDB->open or die "Could not open accounts db";
+
+my @users;
+if ($event eq 'bootstrap-ldap-save')
+{
+    @users = $a->users;
+}
+else
+{
+    die "Username argument missing." unless defined ($userName);
+    my $u = $a->get($userName) or die "No account db record found for user $userName";
+    @users = ($u);
+}
+foreach my $u (@users)
+{
+    my $type = $u->prop('type');
+    my $userName = $u->key;
+
+    die "Account $userName is not a user account; modify user failed.\n"
+	unless ( ($userName eq 'admin') or ($type eq 'user') );
+
+    setpwent;
+    my ($comment, $shell) = (getpwnam($userName))[6,8];
+    endpwent;
+    my $new_shell = $u->prop('Shell')
+		|| (($shell eq "/bin/sshell") ? "/usr/bin/rssh" : $shell);
+
+    $u->set_prop('Shell', $new_shell) unless (not defined $u->prop('Shell') && $new_shell eq "/usr/bin/rssh" ) ;
+
+    my $result;
+    #------------------------------------------------------------
+    # Modify user's shell, if required, in /etc/passwd using "usermod"
+    #------------------------------------------------------------
+    unless ($shell eq $new_shell)
+    {
+        if ($ldapauth ne 'enabled')
+        {
+            system("/usr/sbin/usermod", '-s', "$new_shell", $userName) == 0
+                or ( $x = 255, warn "Failed to modify shell of (unix) account $userName.\n" );
+        }
+
+        my @new_shell = ($new_shell);
+        $result = $ldap->modify("uid=$userName,ou=Users,$base",
+                      replace => {
+                          loginShell => \@new_shell
+                      }
+        );
+        $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify shell of (ldap) account $userName.\n" );
+    }
+
+    #------------------------------------------------------------
+    # Modify user's first name and last name if required,
+    # in /etc/passwd using "usermod"
+    #------------------------------------------------------------
+    my $first = $u->prop('FirstName') || "";
+    my $last = $u->prop('LastName') || "";
+    my $new_comment = "$first $last";
+
+    unless ($comment eq $new_comment)
+    {
+        if ($ldapauth ne 'enabled')
+        {
+            system("/usr/sbin/usermod", "-c", "$first $last", $userName) == 0
+                or ( $x = 255, warn "Failed to modify comment of (unix) account $userName.\n" );
+        }
+
+        my @new_comment = ($new_comment);
+        my @first = ($first);
+        my @last = ($last);
+        $result = $ldap->modify("uid=$userName,ou=Users,$base",
+                      replace => {
+                          givenName => \@first,
+                          sn => \@last,
+                          cn => \@new_comment,
+                          displayName => \@new_comment
+                      }
+        );
+        $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify comment/name of (ldap) account $userName.\n" );
+    }
+
+    my @new_phone = ($u->prop('Phone')) || ();
+    my @new_company = ($u->prop('Company')) || ();
+    my @new_dept = ($u->prop('Dept')) || ();
+    my @new_city = ($u->prop('City')) || ();
+    my @new_street = ($u->prop('Street')) || ();
+    $result = $ldap->modify("uid=$userName,ou=Users,$base",
+                            replace => {
+                                telephoneNumber => \@new_phone,
+                                o => \@new_company,
+                                ou => \@new_dept,
+                                l => \@new_city,
+                                street => \@new_street
+                            }
+    );
+    $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify email of (ldap) account $userName.\n" );
+
+}
+
+$ldap->unbind;
+exit ($x);

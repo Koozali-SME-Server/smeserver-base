@@ -1,0 +1,15 @@
+{
+   # memory limit to catch any memory leak before it kills the system
+   use constant MIN_MEMORY_LIMIT => 100000000;
+   
+   # If there is a memory limit in the database and it is below the minimum, delete it. 
+   if (defined $pppoe{Mlimit} && $pppoe{Mlimit} < MIN_MEMORY_LIMIT)
+   {
+      $DB->get_prop_and_delete('pppoe','Mlimit');
+      delete $pppoe{Mlimit};
+   }
+   
+   $OUT = "PPPD_MLIMIT=";
+   $OUT .= $pppoe{Mlimit} || MIN_MEMORY_LIMIT;
+}
+

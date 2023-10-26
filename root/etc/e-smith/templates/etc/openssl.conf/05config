@@ -1,0 +1,38 @@
+{
+#    use Data::Validate::IP;
+    use Net::IP qw(ip_is_ipv4 ip_is_ipv6);
+    our $KeySize = $modSSL{KeySize} ||'4096';
+    our $FQDN = "$SystemName.$DomainName";
+    our $Country = $modSSL{Country} || "--";
+    our $State = $modSSL{State} || "----";
+    our $commonName = $modSSL{CommonName} || $FQDN;
+    our $crt = "/home/e-smith/ssl.crt/$FQDN.crt";
+    our $key = "/home/e-smith/ssl.key/$FQDN.key";
+    our $defaultCity = $ldap{defaultCity} || '-';
+    our $defaultCompany = $ldap{defaultCompany} || $commonName ;
+    our $defaultDepartment = $ldap{defaultDepartment} || '-';
+    our $email = "admin\@$DomainName";
+    our @subjectAlt = `/sbin/e-smith/generate-subjectaltnames`;
+    chomp @subjectAlt;
+    our $subjectAltName = "";
+	my $i=0;
+	for my $elem (@subjectAlt) {
+		$subjectAltName .= ", " if $i>0;
+		$i++;
+		if (ip_is_ipv4($elem) || ip_is_ipv6($elem) ){
+		$subjectAltName .= "IP:$elem";
+		next;
+		}
+		$subjectAltName .= "DNS:$elem";
+	}
+    $subjectAltName = ( $subjectAltName eq "DNS: ")? "": $subjectAltName;
+
+    # crop fields that are too long for X509:
+    $Country = substr($Country, 0, 2);
+    $defaultCity = substr($defaultCity, 0, 128);
+    $defaultCompany = substr($defaultCompany, 0, 64);
+    $defaultDepartment = substr($defaultDepartment, 0, 64);
+    $email = substr($email, 0, 64);
+    $commonName = substr($commonName, 0, 64);
+    $OUT="";
+}

@@ -1,0 +1,7 @@
+session     required      pam_limits.so
+session     required      pam_unix.so
+{
+    my $status = $ldap{Authentication} || 'disabled';
+    return unless $status eq 'enabled';
+    $OUT .= "session     optional      pam_ldap.so";
+}

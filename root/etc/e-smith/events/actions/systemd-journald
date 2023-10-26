@@ -1,0 +1,5 @@
+#!/bin/bash
+if [[ ! -d /var/log/journal ]]; then
+	mkdir -p /var/log/journal
+	/usr/bin/systemd-tmpfiles --create --prefix /var/log/journal
+fi

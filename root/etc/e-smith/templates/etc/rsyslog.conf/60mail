@@ -1,0 +1,4 @@
+{
+# Log all the mail messages in one place.
+}
+mail.*							-{ "${maillog}" }

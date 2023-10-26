@@ -1,0 +1,21 @@
+{
+$interface=$InternalInterface{'Name'}||"hum";
+$configfile='/etc/dhcpd.conf';
+$leasefile='/var/lib/dhcpd/dhcpd.leases';
+
+$OUT .="";
+}
+[Service]
+Type=notify
+ExecStartPre=/sbin/e-smith/service-status dhcpd
+ExecStartPre=/sbin/e-smith/expand-template {$configfile}
+ExecStartPre=/bin/touch {$leasefile}
+#first empty one is to delete original one, as ExecStart allow multiple entries
+ExecStart=
+ExecStart=/usr/bin/sh -c 'exec /usr/sbin/dhcpd -f -cf /etc/dhcpd.conf -lf /var/lib/dhcpd/dhcpd.leases -user dhcpd -group dhcpd --no-pid {$interface} >>/var/log/dhcpd/current 2>>/var/log/dhcpd/current'
+#for systemd >=240
+#StandardOutput=append:/var/log/dhcpd/current
+#StandardError=inherit
+Restart=always
+RestartSec=2
+

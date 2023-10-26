@@ -1,0 +1,14 @@
+{
+# provides support for local system logging (e.g. via logger command)
+}
+$ModLoad imuxsock
+{
+# provides kernel logging support (previously done by rklogd)
+}
+$ModLoad imklog
+{
+# provides getting logs from journald
+}
+$ModLoad imjournal
+
+

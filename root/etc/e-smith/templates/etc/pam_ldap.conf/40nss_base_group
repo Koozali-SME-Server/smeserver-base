@@ -1,0 +1,5 @@
+{
+    $OUT .= "nss_base_group ou=Groups,";
+    $OUT .= esmith::util::ldapBase ($DomainName);
+    $OUT .= "?one\n";
+}

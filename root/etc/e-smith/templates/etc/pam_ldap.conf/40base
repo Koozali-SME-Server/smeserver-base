@@ -1,0 +1,3 @@
+{
+    $OUT .= "base " . esmith::util::ldapBase ($DomainName);
+}

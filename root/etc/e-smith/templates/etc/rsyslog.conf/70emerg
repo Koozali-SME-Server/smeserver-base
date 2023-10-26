@@ -1,0 +1,5 @@
+{
+# Everybody gets emergency messages
+}
+*.emerg							:omusrmsg:*
+

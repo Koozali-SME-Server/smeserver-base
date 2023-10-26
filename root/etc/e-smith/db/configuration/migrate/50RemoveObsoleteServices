@@ -1,0 +1,10 @@
+{
+
+  # Remove old, unused services from the configuration database
+  my @services = qw(haldaemon smolt udev-post messagebus ctrlaltdel pptpd klogd);
+  foreach my $service (@services){
+    my $entry = $DB->get($service);
+    $entry->delete if $entry;
+  }
+
+}

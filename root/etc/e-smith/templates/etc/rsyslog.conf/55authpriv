@@ -1,0 +1,4 @@
+{
+# The authpriv file has restricted access.
+}
+authpriv.*						{ "${secure}" }

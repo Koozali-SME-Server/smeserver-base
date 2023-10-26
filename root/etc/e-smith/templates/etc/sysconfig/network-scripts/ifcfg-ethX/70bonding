@@ -1,0 +1,11 @@
+{
+    $OUT = "";
+    return unless ($InternalInterface{Name} eq "bond0");
+    # FIXME: this should be restricted to the real slaves
+    # and not every interface except bond0
+    if ($THIS_DEVICE ne 'bond0')
+    {
+	$OUT .= "MASTER=bond0\n";
+	$OUT .= "SLAVE=yes";
+    }
+}

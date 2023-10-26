@@ -1,0 +1,22 @@
+[Unit]
+Wants={
+
+foreach my $service ($c->get_all_by_prop(type => 'service')){
+  my $status  = $service->prop('status')  || 'enabled';
+  my $servicename = $service->prop('SystemdUnit') || $service->key . ".service" || "";
+  next unless $servicename || $servicename eq ".service";
+  $status = ($status eq "enabled") ? "enable" : "disable";
+  unless ( $service->key ~~ @list ) {
+    $status = "disable" if  -e "/etc/rc.d/init.d/".$service->key || -e "/etc/rc.d/init.d/supervise/".$service->key;
+    }
+  next unless -e "/usr/lib/systemd/system/$servicename" || -e "/etc/lib/systemd/system/$servicename";
+  # bootstrap-console is wantedby basic.target
+  next if ($servicename eq "bootstrap-console.service");
+  # we could also filter out there services that have already WantedBy=.*sme-server.target in their unit file or in a drop-in 
+
+  $OUT .= "$servicename " if ($status eq "enable");
+
+  }
+
+}
+

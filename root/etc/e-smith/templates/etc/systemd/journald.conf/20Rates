@@ -1,0 +1,3 @@
+#SyncIntervalSec=5m
+#RateLimitInterval=30s
+#RateLimitBurst=1000

@@ -1,0 +1,126 @@
+#!/usr/bin/perl -w
+#----------------------------------------------------------------------
+# add_drive_to_raid: Add spare disk to existing raid arrays
+#----------------------------------------------------------------------
+# Copyright (C) 2005 Gordon Rowell <gordonr@gormand.com.au>
+# Copyright (C) 2006 Shad L. Lords <slords@mail.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+#----------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Data::Dumper;
+
+my %options = ();
+
+GetOptions(\%options, 'f', 'force');
+
+my $force = $options{f} || $options{force};
+my $newdev = $ARGV[0] || die "usage:\n\n\tadd_drive_to_raid [-f] dev\n\n";
+my $target_drive = "/dev/$newdev";
+my $raid = require "/sbin/e-smith/console-menu-items/manageRAID.pl";
+
+# Log STDOUT from this point on and return STDERR back to the console
+my $pid = open(STDOUT, "|-");
+die gettext("Can't fork"), ": $!\n" unless defined $pid;
+
+unless ($pid)
+{
+    exec qw(/usr/bin/logger -p local1.info -t add_drive_to_raid);
+}
+
+# Get dictionary of active md devices and sort by size
+my %devices = $raid->get_raid_details();
+my @devices = sort { $devices{$a}{DeviceSize} <=> $devices{$b}{DeviceSize} } keys %devices;
+
+die "There are no RAID devices configured\n" unless $#devices >= 0;
+
+# Get dictionary of all partitions from /proc/partitions
+my %partitions = $raid->get_partitions();
+my @partitions;
+
+die "$target_drive is not a block special device\n" unless -b $target_drive;
+
+# Calculate min size of new disk to accomodate active md devices
+my $minsize = 0;
+for my $dev (@devices)
+{
+    die "$target_drive is already in use\n" if grep m#^$newdev$#, @{$devices{$dev}{UsedDisks}};
+    $minsize += $devices{$dev}{DeviceSize} + 65;
+}
+
+die "$target_drive is not large enough\n" unless $partitions{$newdev}{blocks} >= $minsize;
+die "$target_drive already contains partitions\n" unless $force or ! grep m#^$newdev.+$#, keys %partitions;
+
+# Find a healthy drive hosting our /boot partition to use as our template
+my @srcdrives = qx(df /boot --output=source | grep /dev/ | xargs -r lsblk -lnsp | grep disk);
+die "Unable to identify existing boot device - manual intervention required\n" unless (scalar @srcdrives) >= 1;
+my ($source_drive) = $srcdrives[0] =~ /(\S+)/;
+print "Using $source_drive as source partition template.\n";
+
+# Check if it's MBR or GPT
+my $pttype = qx(blkid -o value -s PTTYPE $source_drive);
+chomp $pttype;
+die "Unable to identify source partition table type for $source_drive\n" unless $pttype;
+print "$source_drive partition table type is $pttype\n";
+
+# Clear disk in preparation
+print "Wiping $target_drive...\n";
+system("wipefs", "-a", $target_drive) == 0
+	or die "Error clearing existing partition table on $target_drive\n";
+
+# Copy new partition layout
+print "Copying partition table from $source_drive to $target_drive...\n";
+if ($pttype eq 'dos') {
+	system("sfdisk -d $source_drive | sfdisk -qf --no-reread $target_drive") == 0
+		or die "Error copying MBR partition table to $target_drive\n";
+} elsif ($pttype eq 'gpt') {
+	system("sgdisk", "-R", $target_drive, $source_drive) == 0
+		or die "Error copying GPT partition table to $target_drive\n";
+	system("sgdisk", "-G", $target_drive) == 0
+		or die "Error randomising GUID on $target_drive\n";
+} else {
+	die "Couldn't interpret partition table type '$pttype' on $source_drive\n";
+}
+
+# Pause to sync
+sleep(3);
+
+# Install GRUB
+print "Installing GRUB on $target_drive...\n";
+system("grub2-install", "--recheck", $target_drive) == 0
+	or warn "Warning - error installing GRUB to $target_drive\n";
+
+# Loop through RAID devices and add the corresponding new partitions
+my @srcparts;
+my $srcpart;
+my $tgtpart;
+foreach my $part (0..$#devices)
+{
+	# Find the matching source drive partition and substitute the name
+	@srcparts = qx(mdadm -v --detail --scan $devices[$part]);
+	foreach my $s (@srcparts) {($srcpart) = $s =~ /devices=(\Q$source_drive\E\d+)/};
+	$tgtpart = $srcpart =~ s/\Q$source_drive/$target_drive/r;
+	
+	print "Adding $tgtpart to $devices[$part]\n";
+	system("/sbin/mdadm", $devices[$part], "--add", $tgtpart) == 0
+		or die "Error adding $tgtpart to $devices[$part]";
+}
+
+# Finished
+print "Successfully added $target_drive to RAID!\n";

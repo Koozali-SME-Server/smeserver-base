@@ -1,0 +1,3 @@
+# create new (empty) log files after rotating old ones
+create
+

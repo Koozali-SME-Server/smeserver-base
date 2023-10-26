@@ -1,0 +1,6 @@
+{
+# Don't be as aggressive on rate limiting of messages
+}
+$SystemLogRateLimitInterval 0
+$SystemLogRateLimitBurst 0
+$MaxOpenFiles 4096

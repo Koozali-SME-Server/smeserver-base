@@ -1,0 +1,8 @@
+{
+    foreach my $iface ( qw(InternalInterface ExternalInterface) )
+    {
+        my $iface = $DB->get($iface) || next;
+        next unless $iface->prop('HWAddress');
+        $iface->delete_prop('HWAddress');
+    }
+}

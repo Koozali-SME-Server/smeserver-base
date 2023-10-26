@@ -1,0 +1,28 @@
+[Unit]
+Description=SME server bootstrap-runlevel7 to start old SME rc7.d services
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=livesys.service plymouth-quit-wait.service
+After=systemd-vconsole-setup.service
+After=basic.target bootstrap-console.service
+Before=getty@tty1.service
+Before=shutdown.target
+ConditionPathExistsGlob=/etc/rc.d/rc7.d/S**
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/root
+ExecStartPre=-/bin/plymouth quit
+ExecStart=/sbin/e-smith/bootstrap-runlevel7
+Type=oneshot
+Restart=no
+TimeoutSec=0
+StandardInput=tty
+StandardOutput=tty
+StandardError=tty
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+
+[Install]
+WantedBy=sme-server.target

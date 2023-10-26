@@ -1,0 +1,12 @@
+{
+# set status as enabled starting SME10
+# remove the -m option from the property email
+
+    my $email = $DB->get_prop('smartd','email') or return;
+
+    if ($email =~ /^-m (.*)$/)
+    {
+        $DB->set_prop('smartd','email', $1);
+        $DB->set_prop('smartd','status', 'enabled');
+    }
+}

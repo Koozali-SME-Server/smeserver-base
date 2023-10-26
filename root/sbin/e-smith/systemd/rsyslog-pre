@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# before 10.1 rsyslog was listening to /dev/log
+# we want systemd-journald listen to that now
+# and rsyslog to /run/systemd/journal/syslog
+# will not be needed in SME 11
+
+if [[ ! -S /dev/log ]]; then
+  #echo "no /dev/log"
+  /usr/bin/systemctl restart systemd-journald.socket
+  /usr/bin/systemctl restart systemd-journald.service
+fi
+
+# we can now keep going with rsyslog startup
+# /etc/rsyslog.conf will define the use of /run/systemd/journal/syslog
+

@@ -1,0 +1,1 @@
+/etc/rc.d/rc7.d

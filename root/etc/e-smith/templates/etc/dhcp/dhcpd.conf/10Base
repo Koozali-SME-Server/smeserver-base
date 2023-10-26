@@ -1,0 +1,6 @@
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.sample
+#   see 'man 5 dhcpd.conf'
+#
+# The dhcpd configuration file is located at /etc/dhcpd.conf

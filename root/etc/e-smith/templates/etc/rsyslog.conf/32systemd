@@ -1,0 +1,4 @@
+# systemd
+:programname, isequal, "systemd"            { (($rsyslog{systemd} || "disabled") ne "enabled" )? "stop" : "/var/log/systemd.log
+& stop" }
+

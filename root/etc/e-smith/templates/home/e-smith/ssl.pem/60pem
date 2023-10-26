@@ -1,0 +1,12 @@
+{
+    my $pem = $modSSL{'CertificateChainFile'};
+    if ($pem and -e $pem)
+    {
+        open(PEM, $pem) or warn "Intermediate Certificate File defined, but cannot open $pem : $!";
+        my @pem = <PEM>;
+        chomp @pem;
+        $OUT = join "\n", @pem;
+        close PEM;
+    }
+}
+

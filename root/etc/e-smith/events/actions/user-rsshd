@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+package esmith;
+
+use strict;
+use Errno;
+use esmith::ConfigDB;
+use esmith::AccountsDB;
+use File::Temp;
+
+sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
+my $conf = esmith::ConfigDB->open_ro;
+my $accounts = esmith::AccountsDB->open;
+
+my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
+my $x = 0; # exit value
+
+my $groupName = 'rsshusers';
+my $gid = getgrnam($groupName);
+my $tmpattr = File::Temp->new();
+
+my $event = $ARGV[0];
+my $userName = $ARGV[1];
+# finallement get all user
+my @users = (not defined $ARGV[1])?  $accounts->get_all_by_prop(type => "user" ) : map { $accounts->get($_); } $userName;
+my @currents=split /\n/, `/usr/sbin/lid -ng  rsshusers`;
+@currents=map { trim($_) } @currents;
+
+# here we could be emptying group, but we might want to let system user on this list.
+#if ( $event ~~ ['user-modify','user-create'] ) {
+#	system("/usr/bin/gpasswd","-M ''", "rsshusers");
+#	print "deleting rsshusers group content ...";
+#}
+
+foreach my $user (@users) {
+	my $cuser=$user->key;
+	# we remove users that should not be there
+	if ( defined $user->prop('Shell') &&  $user->prop('Shell') ne '/usr/bin/rssh') {
+		next unless ( "$cuser" ~~ @currents ) ;
+		system("/usr/bin/gpasswd", "-d", $cuser, "rsshusers");
+		next;
+	}
+	# next if the user is already there
+	print $tmpattr "memberUid: $cuser\n";
+	next if ( "$cuser" ~~ @currents ) ;
+	print "Adding user $cuser to group rsshusers";
+	system("/usr/sbin/usermod", "-a", "-G", "rsshusers", $cuser);
+
+}
+
+# add all users to rsshusers
+system("/usr/sbin/cpu", "-C/etc/cpu-system.conf", "groupmod", "-a", "$tmpattr", "$groupName") == 0
+or
+system( "/usr/sbin/cpu", "groupadd", "-g", $gid, "-a", "$tmpattr", $groupName  ) == 0  or ( $x =  $ldapauth ne 'enabled' ? $x : 255 , warn "Failed to create (ldap) group $groupName.\n" );
+
+exit ($x);

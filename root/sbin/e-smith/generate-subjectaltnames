@@ -1,0 +1,125 @@
+#!/usr/bin/perl -w
+
+#----------------------------------------------------------------------
+#
+# generate-subjectaltnames
+#
+# This script returns a list of hostnames and IP addresses that
+# can be used to construct the list of subjectAltName entries
+# for a web server certificate.
+#
+# Usage:  generate-subjectaltnames
+#
+# Copyright 1999-2003 Mitel Networks Corporation
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+#
+#----------------------------------------------------------------------
+
+use esmith::ConfigDB;
+use esmith::HostsDB;
+
+my $configuration = esmith::ConfigDB->open_ro('configuration')
+    or die "Couldn't open configuration DB\n";
+my $domains = esmith::ConfigDB->open_ro('domains')
+    or die "Couldn't open domains DB\n";
+
+my $hosts = esmith::HostsDB->open_ro()
+    or die "Couldn't open domains DB\n";
+
+my %results_dict = ();
+
+#----------------------------------------------------------------------
+# Add FQDN, system name and the domain name.
+#----------------------------------------------------------------------
+
+$SystemName = $configuration->get('SystemName')->value;
+$DomainName = $configuration->get('DomainName')->value;
+
+$results_dict{$SystemName . '.' . $DomainName} = 1;
+$results_dict{$SystemName} = 1;
+$results_dict{$DomainName} = 1;
+
+#----------------------------------------------------------------------
+# Add a wildcard entry for domain name.
+#----------------------------------------------------------------------
+
+$results_dict{'*.' . $DomainName} = 1;
+
+#----------------------------------------------------------------------
+# Add IP addresses for the various interfaces.
+#----------------------------------------------------------------------
+
+foreach $Interface ('InternalInterface',
+                    'ExternalInterface',
+                    'ExternalInterface2')
+{
+    $Interface_Record = $configuration->get($Interface);
+    if ($Interface_Record)
+    {
+        if (defined $Interface_Record->prop('Configuration') and $Interface_Record->prop('Configuration') eq 'static')
+        {
+            if ($Interface_Record->prop('IPAddress'))
+            {
+                $results_dict{$Interface_Record->prop('IPAddress')} = 1;
+            }
+        }
+    }
+}
+
+#----------------------------------------------------------------------
+# Add all domains defined
+#----------------------------------------------------------------------
+my $modSSL = $configuration->get('modSSL');
+my $AddDomains = $modSSL->prop('AddDomains') || "enabled";
+if ( $AddDomains eq "enabled" )
+{
+    foreach my $domain ( $domains->get_all_by_prop(type => 'domain')  )
+    {
+	$results_dict{$domain->key} = 1;
+    }
+}
+
+#----------------------------------------------------------------------
+# Add all hosts per domains defined
+#----------------------------------------------------------------------
+my $AddHosts = $modSSL->prop('AddHosts') || "enabled";
+if ( $AddHosts eq "enabled" )
+{
+    foreach my $domain ($domains->get_all_by_prop(type => 'domain')) #ignore domain-remote
+    {
+        foreach my $host ( $hosts->get_hosts_by_domain($domain->key)  )
+        {
+            next unless (($host->prop('HostType')||'undef') eq 'Self'); #only define self host
+            $results_dict{$host->key} = 1;
+        }
+    }
+}
+        
+#----------------------------------------------------------------------
+# Add any alternate names specified in the modSSL config DB.
+#----------------------------------------------------------------------
+
+if ($modSSL)
+{
+    $AlternateNames = $modSSL->prop('AlternateNames');
+    if ($AlternateNames)
+    {
+        foreach $AlternateName (split(',', $AlternateNames))
+        {
+            $AlternateName =~ s/\s//g;
+            $results_dict{$AlternateName} = 1;
+        }
+    }
+}
+
+#----------------------------------------------------------------------
+# Output the sorted list of entries.
+#----------------------------------------------------------------------
+
+foreach (sort keys %results_dict)
+{
+    print "$_\n";
+}
+
+exit(0);

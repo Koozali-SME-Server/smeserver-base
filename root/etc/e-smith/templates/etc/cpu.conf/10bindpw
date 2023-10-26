@@ -1,0 +1,2 @@
+BIND_DN         = "cn=root,{ esmith::util::ldapBase ($DomainName); }"
+BIND_PASS       = { esmith::util::LdapPassword (); }

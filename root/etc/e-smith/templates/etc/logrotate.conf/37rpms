@@ -1,0 +1,4 @@
+# RPM packages drop log rotation information into this directory
+include /etc/logrotate.d
+
+

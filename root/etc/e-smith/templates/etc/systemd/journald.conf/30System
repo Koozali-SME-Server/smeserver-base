@@ -1,0 +1,8 @@
+#SystemMaxUse= # default 10% and not more than 4G
+#SystemKeepFree= # default 15% and not more than 4G
+#SystemMaxFileSize= # default 1/8 SystemMaxUse
+#RuntimeMaxUse=
+#RuntimeKeepFree=
+#RuntimeMaxFileSize=
+MaxRetentionSec={$rsyslog{'PurgeLength'} || '95'}day
+MaxFileSec={$rsyslog{'RotateDays'} || '7'}day

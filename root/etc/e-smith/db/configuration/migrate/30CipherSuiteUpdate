@@ -1,0 +1,9 @@
+{
+    # Remove CipherSuite if it is the last insecure value
+    # Will not change CipherSuite if it has been modified from the original default, or deleted.
+    return unless defined $modSSL{CipherSuite};
+    if($modSSL{CipherSuite} eq 'HIGH:!SSLv2')
+    {
+        $DB->get('modSSL')->delete_prop ('CipherSuite');
+    }
+}

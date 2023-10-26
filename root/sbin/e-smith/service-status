@@ -1,0 +1,30 @@
+#! /bin/sh
+
+SERVICE=$1
+USAGE="Usage: service-status SERVICENAME"
+
+#if no servicename is provided return usage
+if [[ "${SERVICE}" == "" ]]
+then
+   echo ${USAGE} >&2
+   exit 1
+fi
+
+TYPE=$(/sbin/e-smith/db configuration gettype "$SERVICE" || echo none)
+
+if [[ "$TYPE" != 'service' ]]
+then
+    echo "$SERVICE is not a service"
+    exit 9
+fi
+
+STATUS=$(/sbin/e-smith/db configuration getprop "$SERVICE" status || echo disabled)
+
+if [[ "$STATUS" != 'enabled' ]]
+then
+    echo "$SERVICE status not enabled in configuration db."
+    exit 0
+    # change this one to 5 if you want systemd to fail on ExecStartPre
+fi
+
+exit 0

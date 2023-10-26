@@ -1,0 +1,54 @@
+#!/bin/bash
+# this script is to migrate old symlink log to regular file in order 
+# to be handled by logrotate
+
+#known files that could be symlinks
+FILES="/var/log/cron
+/var/log/maillog
+/var/log/messages
+/var/log/secure
+/var/log/spooler
+/var/log/boot.log
+/var/log/httpd/admin_access_log
+/var/log/httpd/admin_error_log
+/var/log/httpd/access_log
+/var/log/httpd/error_log
+/var/log/httpd/fpbx_error_log
+/var/log/httpd/fpbx_access_log
+/var/log/httpd/bkpc_access_log
+/var/log/httpd/bkpc_error_log
+/var/log/httpd/issoqlog_access_log
+/var/log/httpd/isoqlog_access_log
+/var/log/httpd/isoqlog_error_log
+/var/log/httpd/pki_access_log
+/var/log/httpd/pki_error_log
+/var/log/pluto/pluto.log"
+
+
+#counter
+found=0
+
+# could do also $(find /var/log/ -type l)
+for f in $FILES
+do
+  if [ -L "$f" ]; then
+     echo "Processing $f"
+     mylink=$(readlink "$f")
+     unlink $f
+     touch $f
+     if [ -f "$mylink" ]; then
+        cp --attributes-only "$mylink" "$f"
+     fi
+     ((found+=1))
+  fi
+done
+
+# exit if we are running bootstrap-console.service, to avoid systemd queue loop
+/usr/bin/systemctl --quiet is-active   bootstrap-console.service && exit 0;
+# restart the needed services
+if [ $found -gt 0 ] ; then
+   /usr/bin/systemctl daemon-reload > /dev/null 2>/dev/null
+   /usr/bin/systemctl --quiet is-active httpd-*.service  && /usr/bin/systemctl reload httpd-*.service > /dev/null 2>/dev/null
+   /usr/bin/systemctl --quiet is-active  rsyslog.service && /usr/bin/systemctl restart rsyslog.service > /dev/null 2>/dev/null
+fi
+

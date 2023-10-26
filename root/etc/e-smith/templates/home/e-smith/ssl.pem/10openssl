@@ -1,0 +1,8 @@
+{
+    $OUT = '';
+    # let's expand the /etc/openssl.conf configuration
+    use esmith::templates;
+    esmith::templates::processTemplate({
+            TEMPLATE_PATH => "/etc/openssl.conf"
+            });
+}

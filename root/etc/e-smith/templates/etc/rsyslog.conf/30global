@@ -1,0 +1,5 @@
+{
+# Use default timestamp format
+}
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+$SpaceLFOnReceive on

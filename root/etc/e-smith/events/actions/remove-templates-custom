@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+use strict;
+use warnings;
+
+my %files = (
+	'/etc/e-smith/templates-custom/etc/httpd/conf/httpd.conf/20LoadModule80PHP' 	=> 'f1754b2ea09ec195d816b3e6d4b044a5', #smeserver-php-scl
+	'/etc/e-smith/templates-custom/etc/hosts.allow/sshd' 				=> 'd08f437bc0b38e996341f564cf446828', #smeserver-denyhosts
+	'/etc/e-smith/templates-custom/etc/httpd/conf/httpd.conf/35SSL00Listen443' 	=> 'a3d1cf339126da076c1dcc2b21602bc9', #smeserver-softethervpn-server
+	'/etc/e-smith/templates-custom/etc/dhcpd.conf/25DomainNameServers' 		=> 'c201caf9528713b55708173a3ef26f18', #smeserver-dhcpmanager
+	'/etc/e-smith/templates-custom/etc/dhcpd.conf/25LeaseTimeDefault' 		=> 'ad4468c7b2ad8f275514e7ce61747651', #smeserver-dhcpmanager
+	'/etc/e-smith/templates-custom/etc/dhcpd.conf/25LeaseTimeMax' 			=> 'a450dbc91dc0d6443b29069d829c0a51', #smeserver-dhcpmanager
+	'/etc/e-smith/templates-custom/etc/dhcpd.conf/25Routers'			=> 'd14a9b0153af3b7c608bb59eaccc24fc'  #smeserver-dhcpmanager
+
+);
+
+for my $filename (keys %files) {
+  next unless ( -f $filename);
+  open (my $fh, '<', $filename) or die "Can't open '$filename': $!";
+  binmode ($fh);
+  my $sum =Digest::MD5->new->addfile($fh)->hexdigest;
+  next unless $files{$filename} eq $sum;
+  warn "md5sum matches, deleting fragment $filename identified as owned by a previous rpm\n";
+  unlink $filename or warn "failed to remove $filename\n";
+}

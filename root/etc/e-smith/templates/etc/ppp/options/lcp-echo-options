@@ -1,0 +1,2 @@
+lcp-echo-interval { $pppoe{lcpEchoInterval} || '30' }
+lcp-echo-failure { $pppoe{lcpEchoFailure} || '2' }

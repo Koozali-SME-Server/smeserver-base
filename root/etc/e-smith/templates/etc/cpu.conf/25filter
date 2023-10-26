@@ -1,0 +1,2 @@
+USER_FILTER     = (objectClass=posixAccount)
+GROUP_FILTER    = (objectClass=posixGroup)

@@ -1,0 +1,9 @@
+[ req_distinguished_name ]
+C	                        = {$Country}
+ST		                = {$State}
+L                               = {$defaultCity}
+O		                = {$defaultCompany}
+OU		                = {$defaultDepartment}
+CN	                        = {$commonName}
+emailAddress                    = {$email}
+

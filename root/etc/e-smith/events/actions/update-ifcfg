@@ -1,0 +1,71 @@
+#!/usr/bin/perl -w
+
+use esmith::ConfigDB;
+use esmith::templates;
+use esmith::ethernet;
+use strict;
+
+my $c = esmith::ConfigDB->open_ro() ||
+    die "Couldn't open ConfigDB";
+
+my @adapters = split(/\n/, esmith::ethernet::probeAdapters());
+my @nics = ();
+
+if (($c->get('EthernetDriver1')->value || 'unknown') eq 'dummy'){
+  push @adapters, "dummy\tdummy\t10:00:01:02:03:04\tFake Network Interface\tdummy0";
+}
+# If NIC bonding is enabled, we need to handle route-bond0 and ifcfg-bond0
+if (($c->get('InternalInterface')->prop('NICBonding') || 'disabled') eq 'enabled'){
+  push @adapters, "bond\tbond\t10:00:01:02:03:04\tBonding virtual Interface\tbond0";
+}
+
+# Expand templates for every adapters found
+foreach my $adapter (@adapters){
+    my (undef, undef, undef, undef, $nic) = split(/\t/, $adapter, 5);
+    push @nics, $nic;
+    esmith::templates::processTemplate({
+        MORE_DATA => { THIS_DEVICE => $nic },
+        TEMPLATE_PATH => '/etc/sysconfig/network-scripts/ifcfg-ethX',
+        OUTPUT_FILENAME => "/etc/sysconfig/network-scripts/ifcfg-$nic"
+    });
+    esmith::templates::processTemplate({
+        MORE_DATA => { THIS_DEVICE => $nic },
+        TEMPLATE_PATH => '/etc/sysconfig/network-scripts/route-ethX',
+        OUTPUT_FILENAME => "/etc/sysconfig/network-scripts/route-$nic"
+    });
+    esmith::templates::processTemplate({
+        MORE_DATA => { THIS_DEVICE => $nic },
+        TEMPLATE_PATH => '/var/lib/dhclient/dhclient.conf',
+        OUTPUT_FILENAME => "/var/lib/dhclient/dhclient-$nic.conf"
+    });
+}
+
+# Build a list of interfaces for which we want to keep the config
+foreach ($c->get_all_by_prop( type => 'interface')){
+    push @nics, $_->prop('Name');
+}
+push @nics, $_ foreach (qw/ppp0 lo/);
+my %dedup;
+@dedup{@nics} = ();
+@nics = keys %dedup;
+
+# Now remove any ifcfg-X, route-X or dhclient-X.conf
+# for NIC which have been removed
+foreach my $removed (glob "/etc/sysconfig/network-scripts/ifcfg-*"){
+    $removed =~ m/ifcfg\-(.*)$/;
+    my $interface = $1;
+    next if (grep { $_ eq $interface } @nics);
+    unlink $removed;
+}
+foreach my $removed (glob "/etc/sysconfig/network-scripts/route-*"){
+    $removed =~ m/route\-(.*)$/;
+    my $interface = $1;
+    next if (grep { $_ eq $interface } @nics);
+    unlink $removed;
+}
+foreach my $removed (glob "/var/lib/dhclient/dhclient-*.conf"){
+    $removed =~ m/dhclient\-(.*)\.conf$/;
+    my $interface = $1;
+    next if (grep { $_ eq $interface } @nics);
+    unlink $removed;
+}

@@ -1,0 +1,10 @@
+{
+    $OUT .= "nss_base_passwd ou=Users,";
+    $OUT .= esmith::util::ldapBase ($DomainName);
+    $OUT .= '?one';
+    $OUT .= "\n";
+    $OUT .= "nss_base_passwd ou=Computers,";
+    $OUT .= esmith::util::ldapBase ($DomainName);
+    $OUT .= '?one';
+    $OUT .= "\n";
+}

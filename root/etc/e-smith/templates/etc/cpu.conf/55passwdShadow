@@ -1,0 +1,2 @@
+PASSWORD_FILE = "/etc/passfile"
+SHADOW_FILE = "/etc/shadowfile"

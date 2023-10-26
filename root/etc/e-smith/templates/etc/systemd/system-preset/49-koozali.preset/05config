@@ -1,0 +1,12 @@
+# Koozali SME Server 
+# auto generated list of services
+{
+use esmith::ConfigDB;
+our $c = esmith::ConfigDB->open_ro || die "Couldn't open the configuration database\n";
+
+#list of exception services
+#those services might keep some traces in init.d
+our @list = qw(bootstrap-console masq mysql.init wan lpd clamd diald ldap.init);
+
+my $OUT ="";
+}

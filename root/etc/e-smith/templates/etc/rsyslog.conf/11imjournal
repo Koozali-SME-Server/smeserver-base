@@ -1,0 +1,8 @@
+{
+# configuration for imjournal to import journald log
+}
+$ImjournalIgnorePreviousMessages on
+$OmitLocalLogging off
+$IMJournalStateFile imjournal.state
+$SystemLogSocketName /run/systemd/journal/syslog
+$ImjournalRateLimitInterval 0

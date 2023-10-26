@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+
+use strict;
+use esmith::ConfigDB;
+use esmith::templates;
+use esmith::event;
+use Digest::file qw(digest_file_hex);
+
+my $c = esmith::ConfigDB->open_ro;
+my $s = $c->get('SystemName')->value;
+my $d = $c->get('DomainName')->value;
+my $pem = "/home/e-smith/ssl.pem/$s.$d.pem";
+
+if (!-e $pem){
+    die "$pem doesn't exist. This shouldn't happen. Please report a bug\n";
+}
+
+my $old_hash = digest_file_hex( $pem, 'SHA-1' );
+
+esmith::templates::processTemplate({
+    TEMPLATE_PATH => '/home/e-smith/ssl.pem/pem',
+});
+
+my $new_hash = digest_file_hex( $pem, 'SHA-1' );
+
+if ($old_hash ne $new_hash){
+    event_signal("ssl-update");
+}
