@@ -1,10 +1,10 @@
 # $Id: e-smith-base.spec,v 1.153 2023/08/14 18:55:09 jpp Exp $
 
-Summary: e-smith server and gateway - base module
-%define name e-smith-base
+Summary: smeserver server and gateway - base module
+%define name smeserver-base
 Name: %{name}
 %define version 5.8.1
-%define release 30
+%define release 31
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -66,8 +66,9 @@ Requires: gdisk
 %define dbfiles accounts configuration domains hosts networks
 AutoReqProv: no
 
+Provides: e-smith-base
 %description
-e-smith server and gateway software - base module.
+smeserver server and gateway software - base module.
 
 %prep
 %setup
@@ -179,6 +180,9 @@ fi
 
 
 %changelog
+* Mon Mar 11 2024 rename-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 5.8.1-31.sme
+- Rename to smeserver-base [SME: 12359]
+
 * Thu Oct 26 2023 cvs2git.sh aka Brian Read <brianr@koozali.org> 5.8.1-30.sme
 - Roll up patches and move to git repo [SME: 12338]
 

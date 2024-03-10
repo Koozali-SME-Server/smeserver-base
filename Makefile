@@ -1,6 +1,6 @@
-# Makefile for source rpm: e-smith-base
+# Makefile for source rpm: smeserver-base
 # $Id: Makefile,v 1.1 2016/02/04 23:18:11 vip-ire Exp $
-NAME := e-smith-base
+NAME := smeserver-base
 SPECFILE = $(firstword $(wildcard *.spec))
 
 define find-makefile-common
