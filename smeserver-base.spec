@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 5.8.1
-%define release 31
+%define release 32
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -89,7 +89,7 @@ xgettext -L perl -o root/usr/share/locale/en_US/LC_MESSAGES/server-console.po ro
 perl createlinks
 /sbin/e-smith/buildtests 10e-smith-base
 
-gcc -o root/sbin/e-smith/console console_wrapper.c
+gcc -g -o root/sbin/e-smith/console console_wrapper.c
 
 # Force creation of potentially empty directories
 mkdir -p root/etc/e-smith/web/panels/password/cgi-bin
@@ -180,6 +180,9 @@ fi
 
 
 %changelog
+* Tue Mar 12 2024 Jean-Philippe Pialasse <jpp@koozali.org> 5.8.1-32.sme
+- add gcc -g flag to allow el8 build
+
 * Mon Mar 11 2024 rename-e-smith-pkg.sh by Trevor Batley <trevor@batley.id.au> 5.8.1-31.sme
 - Rename to smeserver-base [SME: 12359]
 
