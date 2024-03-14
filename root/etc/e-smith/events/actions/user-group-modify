@@ -39,7 +39,7 @@ my ($user, $colon, @old_groups) = split(' ', `/usr/bin/groups $userName`);
 # actions for all these groups
 my %modified_groups = map { $_, 1 } @old_groups, $acctdb->user_group_list($userName);
 # but omit "shared" and user private group
-foreach ('shared', $userName, 'rsshusers')
+foreach ('shared', $userName)
 {
     delete $modified_groups{$_} if exists $modified_groups{$_};
 }

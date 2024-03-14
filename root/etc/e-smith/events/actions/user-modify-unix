@@ -79,9 +79,9 @@ foreach my $u (@users)
     my ($comment, $shell) = (getpwnam($userName))[6,8];
     endpwent;
     my $new_shell = $u->prop('Shell')
-		|| (($shell eq "/bin/sshell") ? "/usr/bin/rssh" : $shell);
+		|| (($shell eq "/bin/sshell") ? "/usr/bin/false" : $shell);
 
-    $u->set_prop('Shell', $new_shell) unless (not defined $u->prop('Shell') && $new_shell eq "/usr/bin/rssh" ) ;
+    $u->set_prop('Shell', $new_shell) unless (not defined $u->prop('Shell') && $new_shell eq "/usr/bin/false" ) ;
 
     my $result;
     #------------------------------------------------------------

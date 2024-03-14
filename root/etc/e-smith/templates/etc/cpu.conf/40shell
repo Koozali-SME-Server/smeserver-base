@@ -1,1 +1,1 @@
-DEFAULT_SHELL   = /usr/bin/rssh
+DEFAULT_SHELL   = /usr/bin/false

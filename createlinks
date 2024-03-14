@@ -315,7 +315,6 @@ event_link("rmmod-bonding", $event, "10");
 event_link("conf-startup", $event, "10");
 event_link("user-lock-passwd", $event, "15");
 event_link("group-modify-unix", $event, "15");
-event_link("user-rsshd", $event, "16");
 event_link("update-passwd", $event, "20");
 event_link("count-active-user-accounts", $event, "25");
 event_link("conf-modules", $event, "30");
@@ -343,7 +342,6 @@ templates2events("/etc/smartmontools/smartd.conf", $event);
 templates2events("/home/e-smith/ssl.pem/pem", $event);
 templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
 event_link("set-hostname", $event, "10");
-event_link("user-rsshd", $event, "16");
 event_link("conf-modules", $event, "30");
 event_link("conf-startup", $event, "60");
 event_link("systemd-default", $event, "88");
@@ -454,7 +452,6 @@ event_link("init-accounts", $event, "05");
 event_link("rotate_logfiles", $event, "07");
 event_link("init-passwords", $event, "10");
 event_link("conf-startup", $event, "10");
-event_link("user-rsshd", $event, "16");
 event_link("conf-modules", $event, "30");
 event_link("create-mnt-floppy", $event, "50");
 event_link("systemd-default", $event, "88");
@@ -476,7 +473,6 @@ event_link("rotate_logfiles", $event, "07");
 event_link("conf-startup", $event, "10");
 event_link("user-lock-passwd", $event, "15");
 event_link("group-modify-unix", $event, "15");
-event_link("user-rsshd", $event, "16");
 event_link("update-passwd", $event, "20");
 event_link("count-active-user-accounts", $event, "25");
 event_link("conf-modules", $event, "30");
@@ -513,7 +509,6 @@ event_link("systemd-reload", $event, "89");
 $event = "user-create";
 
 event_link("user-create-unix", $event, "04");
-event_link("user-rsshd", $event, "16");
 event_link("count-active-user-accounts", $event, "25");
 event_link("user-group-modify", $event, "85");
 
@@ -535,7 +530,6 @@ event_link("count-active-user-accounts", $event, "25");
 $event = "user-modify";
 
 event_link("user-modify-unix", $event, "15");
-event_link("user-rsshd", $event, "16");
 event_link("user-group-modify", $event, "85");
 
 $event = "user-modify-admin";

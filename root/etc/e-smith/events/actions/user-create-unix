@@ -72,7 +72,7 @@ my $company = $acct->prop('Company') || '';
 my $dept = $acct->prop('Dept') || '';
 my $city = $acct->prop('City') || '';
 my $street = $acct->prop('Street') || '';
-my $shell = $acct->prop('Shell') || '/usr/bin/rssh';
+my $shell = $acct->prop('Shell') || '/usr/bin/false';
 my $groups = "shared";
 
 if ($ldapauth ne 'enabled')

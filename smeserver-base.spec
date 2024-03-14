@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 5.8.1
-%define release 32
+%define release 33
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -30,7 +30,6 @@ Requires: /usr/sbin/irqbalance
 Requires: /usr/sbin/smartd
 Requires: dbus
 Requires: acpid
-Requires: rssh
 Requires: bridge-utils
 Requires: vconfig
 Requires: e-smith-bootloader
@@ -180,6 +179,9 @@ fi
 
 
 %changelog
+* Thu Mar 14 2024 Jean-Philippe Pialasse <jpp@koozali.org> 5.8.1-33.sme
+- drop rssh support and requirement [SME: 12509]
+
 * Tue Mar 12 2024 Jean-Philippe Pialasse <jpp@koozali.org> 5.8.1-32.sme
 - add gcc -g flag to allow el8 build
 
