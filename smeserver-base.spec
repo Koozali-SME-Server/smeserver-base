@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 2
+%define release 3
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -35,14 +35,13 @@ Requires: vconfig
 Requires: smeserver-bootloader
 Requires: mdadm
 Requires: pv
-Requires: dhcp
+Requires: dhcp-server
 Requires: diald
 Requires: /usr/bin/passwd
 Requires: nss-pam-ldapd
-Requires: uuid-perl
+Requires: perl-Data-UUID
 Requires: kbd
 Requires: bash-completion
-Requires: bash-completion-extras
 Requires: smeserver-runit >= 2.6.0-7
 Requires: smeserver-php >= 3.0.0-22
 Requires: smeserver-yum >= 2.6.0-43 
@@ -179,6 +178,9 @@ fi
 
 
 %changelog
+* Sat Mar 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-3.sme
+- fix requirement for el8 SME11 [SME: 12521]
+
 * Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-2.sme
 - Change Requires: e-smith- to Requires:smeserver-
 
