@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 1
+%define release 2
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -15,11 +15,11 @@ Source: %{name}-%{version}.tar.xz
 
 BuildRoot: /var/tmp/%{name}-%{version}-%{release}-buildroot
 Requires: pwauth
-Requires: e-smith-lib >= 2.2.0-2
+Requires: smeserver-lib >= 2.2.0-2
 Requires: server-manager-images, server-manager
-Requires: e-smith-formmagick >= 1.4.0-12
+Requires: smeserver-formmagick >= 1.4.0-12
 Requires: initscripts >= 6.67-1es17
-Requires: e-smith-daemontools >= 1.7.1-04
+Requires: smeserver-daemontools >= 1.7.1-04
 Requires: perl(Locale::gettext)
 Requires: perl(Crypt::Cracklib)
 Requires: perl(Date::Manip)
@@ -32,7 +32,7 @@ Requires: dbus
 Requires: acpid
 Requires: bridge-utils
 Requires: vconfig
-Requires: e-smith-bootloader
+Requires: smeserver-bootloader
 Requires: mdadm
 Requires: pv
 Requires: dhcp
@@ -43,7 +43,7 @@ Requires: uuid-perl
 Requires: kbd
 Requires: bash-completion
 Requires: bash-completion-extras
-Requires: e-smith-runit >= 2.6.0-7
+Requires: smeserver-runit >= 2.6.0-7
 Requires: smeserver-php >= 3.0.0-22
 Requires: smeserver-yum >= 2.6.0-43 
 Obsoletes: nss_ldap < 254
@@ -58,7 +58,7 @@ Obsoletes: e-smith-dynamicdns-tzo
 Obsoletes: e-smith-dynamicdns-dyndns.org
 Obsoletes: e-smith-dynamicdns-dyndns
 BuildRequires: perl, perl(Test::Inline) >= 0.12
-BuildRequires: e-smith-devtools >= 1.13.1-03
+BuildRequires: smeserver-devtools >= 1.13.1-03
 BuildRequires: gettext
 Requires: gdisk
 
@@ -179,6 +179,9 @@ fi
 
 
 %changelog
+* Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-2.sme
+- Change Requires: e-smith- to Requires:smeserver-
+
 * Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-1.sme
 - Update Release and Version to base version and 1st release for SME11 [SME: 12518]
 
