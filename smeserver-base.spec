@@ -3,8 +3,8 @@
 Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
-%define version 5.8.1
-%define release 33
+%define version 11.0.0
+%define release 1
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -179,6 +179,9 @@ fi
 
 
 %changelog
+* Sat Mar 23 2024 Brian Read <brianr@koozali.org>11.0.0-1.sme
+- Update Release and Version to base version and 1st release for SME11 [SME: 12518]
+
 * Thu Mar 14 2024 Jean-Philippe Pialasse <jpp@koozali.org> 5.8.1-33.sme
 - drop rssh support and requirement [SME: 12509]
 
