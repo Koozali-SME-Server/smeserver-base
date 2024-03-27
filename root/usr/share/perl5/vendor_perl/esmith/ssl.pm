@@ -53,7 +53,7 @@ sub key_exists_good_size {
         # check key size openssl rsa -in /home/e-smith/ssl.key/$host.$domain.key -text -noout | sed -rn "s/Private-Key: \((.*) bit\)/\1/p"
         my $signatureKeySize = `openssl rsa -in  $key -text -noout | grep "Private-Key" | head -1`;
         chomp $signatureKeySize;
-        $signatureKeySize =~ s/^ *Private-Key: \((.*) bit\)/$1/p;
+        $signatureKeySize =~ s/^.*Private-Key: \((.*) bit.*\)/$1/p;
         if ( $signatureKeySize == $KeySize ) {
 		#print "key size is correct ($KeySize)\n";
 		# key exists and key size is correct, we can proceed
@@ -86,7 +86,7 @@ sub cert_exists_good_size {
 	#openssl x509 -text -noout -in /home/e-smith/ssl.crt/$host.$domain.crt| sed -rn "s/Public-Key: \((.*) bit\)/\1/p"
 	my $signatureKeySize = `openssl x509 -text -noout -in $crt  | grep "Public-Key" | head -1`;
 	chomp $signatureKeySize;
-	$signatureKeySize =~ s/^ *Public-Key: \((.*) bit\)/$1/p;
+	$signatureKeySize =~ s/^.*Public-Key: \((.*) bit\)/$1/p;
 	if ( $signatureKeySize == $KeySize ) {
 		#print "$signatureKeySize\n";
 		# cert is  correct size and exists, we can proceed.

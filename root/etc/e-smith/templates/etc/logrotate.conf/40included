@@ -1,16 +1,1 @@
-# no packages own wtmp and btmp -- we'll rotate them here
-/var/log/wtmp \{
-    monthly
-    create 0664 root utmp
-        minsize 1M
-    rotate 1
-\}
-
-/var/log/btmp \{
-    missingok
-    monthly
-    create 0600 root utmp
-    rotate 1
-\}
-
 # system-specific logs may be also be configured here.

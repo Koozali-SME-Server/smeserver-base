@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 3
+%define release 4
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -18,7 +18,10 @@ Requires: pwauth
 Requires: smeserver-lib >= 2.2.0-2
 Requires: server-manager-images, server-manager
 Requires: smeserver-formmagick >= 1.4.0-12
+Requires: plymouth
 Requires: initscripts >= 6.67-1es17
+Requires: network-scripts
+Requires: rsyslog
 Requires: smeserver-daemontools >= 1.7.1-04
 Requires: perl(Locale::gettext)
 Requires: perl(Crypt::Cracklib)
@@ -178,6 +181,14 @@ fi
 
 
 %changelog
+* Tue Mar 26 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-4.sme
+- fix networking [SME: 12541]
+- require rsyslog [SME: 12544]
+- remove unsupported rsyslog option -c [SME: 12545]
+- remove duplicate entry logrotate for btmp and wtmp [SME: 12547]
+- rework systemd-default script (error and smartmatches) [SME: 12543]  
+- fix self signed cert templates [SME: 12551]
+
 * Sat Mar 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-3.sme
 - fix requirement for el8 SME11 [SME: 12521]
 

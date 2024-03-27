@@ -20,7 +20,7 @@ my $filename = "/etc/systemd/system-preset/49-koozali.preset";
 my $filename2 = "/usr/lib/systemd/system/sme-server.target.d/50koozali.conf";
 my %services;
 my %files;
-my @WantedBy;
+my @WantedBy;my %wantedBy;
 
 # expand preset file
 esmith::templates::processTemplate({
@@ -36,7 +36,7 @@ esmith::templates::processTemplate({
             });
 
 # make sure our target is enabled
-system("/usr/bin/systemctl  enable sme-server.target");
+system("/usr/bin/systemctl  enable sme-server.target 2>/dev/null");
 # force the main default target in /usr/lib
 #ln -fs sme-server.target /lib/systemd/system/default.target
 my $old_qfn = "sme-server.target";
@@ -76,7 +76,7 @@ foreach my $d (@presetdirpaths) {
 my $smewants = `grep -P '^Wants=' /usr/lib/systemd/system/sme-server.target -rs`;
 chomp $smewants;
 my @smematches = ( $smewants =~ /([a-zA-Z0-9\-_]+\.service)/g );
- 
+my %smewants = map { $_ => 1 } @smematches; 
 
 # parse all files on reverse order : lower number take precedence
 # we ignore joker lines *
@@ -111,15 +111,15 @@ foreach my $filen (reverse sort keys %files) {
 	    $services{$service}=$stats;
 
 	    # list all Services explicitely listed in preset that are also in Wants= or with WantedBy= sme-server.target 
-	    next if (/^$service$/ ~~ @WantedBy);
-	    if (  /^$service$/ ~~ @smematches ) {
-                push(@WantedBy, $service);
+	    next if ( exists($wantedBy{$service}));
+	    if (exists($smewants{$service}) ) { 
+		$wantedBy{$service}=1; 
 		#print "want $service \n";
             }
             else {
                 my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* -rsh` ;
                 chomp $wanted;
-                push(@WantedBy , $service)  unless ( $wanted eq "") ;
+		$wantedBy{$service}=1 unless ( $wanted eq "");
 		#print "want $service \n" unless ( $wanted eq "") ;
             }
 
@@ -166,7 +166,7 @@ foreach my $fi (@dirfiles) {
 		next;
         }
 	# if not wanted remove
-	unless ( /^$fi$/ ~~ @WantedBy) {
+	unless ( exists($wantedBy{$fi})){
 		print "remove $d$fi as not declared as WantedBy or in Wants for sme-server.target\n";
 		unlink "$d$fi";
 	}
@@ -176,7 +176,7 @@ foreach my $fi (@dirfiles) {
 # we only do it for sme-server.target, ignoring the remaining of WantedBy
 foreach my $service (sort keys %services) {
 	my $wanted= "not";
-	$wanted = "want" if (  /^$service$/ ~~ @WantedBy ); 
+	$wanted = "want" if ( exists($wantedBy{$service}));#(  /^$service$/ ~~ @WantedBy ); 
 	my $status = $services{$service};
 	my $linkedU = ( -e "/usr/lib/systemd/system/sme-server.target.wants/$service" ) ? "linked" : "not";
 	my $linkedE = ( -e "/etc/systemd/system/sme-server.target.wants/$service" ) ? "linked" : "not"; 
@@ -223,8 +223,7 @@ foreach my $fi (@dirfiles) {
 	my $service = $fi;
 	my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* -rsh` ;
 	chomp $wanted;
-        #unless (  /^$fi$/ ~~ @WantedBy  ) {
-        unless (grep(/^$fi$/, @WantedBy  ) ) {
+	unless ( exists($wantedBy{$fi})) {
                 print "$d$fi is not declared as WantedBy or in Wants for sme-server.target\n";
         }
 }
