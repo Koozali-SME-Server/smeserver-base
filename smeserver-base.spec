@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 4
+%define release 5
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -181,6 +181,9 @@ fi
 
 
 %changelog
+* Thu Apr 04 2024 Brian Read <brianr@koozali.org> 11.0.0-5.sme
+- Set license file to GPL2.0  [SME: 12577]
+
 * Tue Mar 26 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-4.sme
 - fix networking [SME: 12541]
 - require rsyslog [SME: 12544]
