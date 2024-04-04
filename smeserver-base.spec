@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 5
+%define release 6
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -181,6 +181,9 @@ fi
 
 
 %changelog
+* Thu Apr 04 2024 Brian Read <brianr@koozali.org> 11.0.0-6.sme
+- Update createlinks to create smeserver-package-update event[SME: 12579]
+
 * Thu Apr 04 2024 Brian Read <brianr@koozali.org> 11.0.0-5.sme
 - Set license file to GPL2.0  [SME: 12577]
 
