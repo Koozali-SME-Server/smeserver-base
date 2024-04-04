@@ -2,14 +2,14 @@
 
 use esmith::Build::CreateLinks  qw(:all);
 
-templates2events("/etc/sysconfig/i18n", qw(post-install post-upgrade e-smith-base-update));
+templates2events("/etc/sysconfig/i18n", qw(post-install post-upgrade smeserver-base-update));
 
-templates2events("/etc/selinux/config", qw(post-install post-upgrade e-smith-base-update));
+templates2events("/etc/selinux/config", qw(post-install post-upgrade smeserver-base-update));
 
-templates2events("/etc/systemd/system-preset/49-koozali.preset", qw(post-install post-upgrade e-smith-base-update console-save bootstrap-console-save bootstrap-ldap-save));
+templates2events("/etc/systemd/system-preset/49-koozali.preset", qw(post-install post-upgrade smeserver-base-update console-save bootstrap-console-save bootstrap-ldap-save));
 
 # give the correct configuration file of dhcpd.conf 
-templates2events("/etc/dhcp/dhcpd.conf", qw(bootstrap-console-save e-smith-base-update));
+templates2events("/etc/dhcp/dhcpd.conf", qw(bootstrap-console-save smeserver-base-update));
 
 # ppp-conf-users
 
@@ -19,7 +19,7 @@ foreach (qw(pap-secrets chap-secrets))
 	    bootstrap-console-save
 	    console-save
 	    remoteaccess-update
-	    e-smith-base-update));
+	    smeserver-base-update));
 }
 
 foreach (qw(
@@ -32,7 +32,7 @@ foreach (qw(
     templates2events("$_", qw(
 	console-save
 	bootstrap-console-save
-	e-smith-base-update
+	smeserver-base-update
 	));
 }
 
@@ -49,7 +49,7 @@ foreach (qw(
     /etc/ppp/ioptions
     ))
 {
-    templates2events($_, qw(console-save bootstrap-console-save e-smith-base-update));
+    templates2events($_, qw(console-save bootstrap-console-save smeserver-base-update));
 }
 
 # conf-networking
@@ -66,7 +66,7 @@ foreach (qw(
     /var/service/wan/dhclient.config
     ))
 {
-    templates2events($_, qw(console-save bootstrap-console-save e-smith-base-update));
+    templates2events($_, qw(console-save bootstrap-console-save smeserver-base-update));
 }
 event_link("update-ifcfg", "console-save", "05");
 event_link("update-ifcfg", "bootstrap-console-save", "05");
@@ -80,7 +80,7 @@ templates2events("/etc/crontab",  qw(
 	post-upgrade
 	email-update
 	logrotate
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/mime.types",  qw(
 	console-save
@@ -89,7 +89,7 @@ templates2events("/etc/mime.types",  qw(
 	post-upgrade
 	email-update
 	logrotate
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/sysconfig/rsyslog",  qw(
 	console-save
@@ -98,7 +98,7 @@ templates2events("/etc/sysconfig/rsyslog",  qw(
 	post-upgrade
 	email-update
 	logrotate
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/rsyslog.conf",  qw(
 	console-save
@@ -107,7 +107,7 @@ templates2events("/etc/rsyslog.conf",  qw(
 	post-upgrade
 	email-update
 	logrotate
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/logrotate.conf",  qw(
         console-save
@@ -116,7 +116,7 @@ templates2events("/etc/logrotate.conf",  qw(
         post-upgrade
         email-update
         logrotate
-        e-smith-base-update
+        smeserver-base-update
         ));
 templates2events("/etc/systemd/journald.conf",  qw(
         console-save
@@ -125,11 +125,11 @@ templates2events("/etc/systemd/journald.conf",  qw(
         post-upgrade
         email-update
         logrotate
-        e-smith-base-update
+        smeserver-base-update
         ));
 templates2events("/etc/updatedb.conf", qw(
 	bootstrap-console-save
-	e-smith-base-update
+	smeserver-base-update
 ));
 templates2events("/etc/openssl.conf",  qw(
         console-save
@@ -141,7 +141,7 @@ templates2events("/etc/openssl.conf",  qw(
 	network-create
 	network-delete
         ip-change
-	e-smith-base-update
+	smeserver-base-update
         ));
 
 # conf-routes
@@ -162,7 +162,7 @@ templates2events("/etc/securetty", qw(
 	ip-change
 	email-update
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/services", qw(
 	console-save
@@ -176,7 +176,7 @@ templates2events("/etc/services", qw(
 	ip-change
 	email-update
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/shells", qw(
 	console-save
@@ -190,7 +190,7 @@ templates2events("/etc/shells", qw(
 	ip-change
 	email-update
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/hosts.deny", qw(
 	console-save
@@ -204,7 +204,7 @@ templates2events("/etc/hosts.deny", qw(
 	ip-change
 	email-update
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 templates2events("/etc/hosts.allow", qw(
 	console-save
@@ -218,7 +218,7 @@ templates2events("/etc/hosts.allow", qw(
 	ip-change
 	email-update
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 foreach my $file (qw(
         /etc/pam.d/login
@@ -230,7 +230,7 @@ foreach my $file (qw(
 	/etc/security/pam_abl.conf
     ))
 {
-    templates2events($file, qw(console-save bootstrap-console-save e-smith-base-update));
+    templates2events($file, qw(console-save bootstrap-console-save smeserver-base-update));
 }
 
 foreach (qw(
@@ -243,7 +243,7 @@ foreach (qw(
 	console-save
 	bootstrap-console-save
 	ldap-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 }
 
@@ -258,13 +258,13 @@ foreach (qw(users.allow accounts.allow accounts.deny))
 	user-create
 	user-delete
 	password-modify
-	e-smith-base-update
+	smeserver-base-update
 	));
 }
 
 # fstab-conf
 
-templates2events("/etc/fstab", qw(post-install post-upgrade e-smith-base-update));
+templates2events("/etc/fstab", qw(post-install post-upgrade smeserver-base-update));
 
 # init-conf
 
@@ -274,13 +274,13 @@ templates2events("/etc/inittab", qw(
 	post-install
 	post-upgrade
 	remoteaccess-update
-	e-smith-base-update
+	smeserver-base-update
 	));
 
 # lynx-conf
 
-templates2events("/etc/lynx.cfg", qw(console-save bootstrap-console-save e-smith-base-update));
-templates2events("/etc/elinks.conf", qw(bootstrap-console-save e-smith-base-update));
+templates2events("/etc/lynx.cfg", qw(console-save bootstrap-console-save smeserver-base-update));
+templates2events("/etc/elinks.conf", qw(bootstrap-console-save smeserver-base-update));
 
 #--------------------------------------------------
 # functions for manager panel
@@ -296,9 +296,9 @@ panel_link("review", $panel);
 panel_link("useraccounts", $panel);
 
 #--------------------------------------------------
-# actions for e-smith-base-update event
+# actions for smeserver-base-update event
 #--------------------------------------------------
-my $event = "e-smith-base-update";
+my $event = "smeserver-base-update";
 
 
 event_link("remove-templates-custom", $event, "02");
