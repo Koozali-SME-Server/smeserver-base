@@ -68,10 +68,10 @@ if ( $apacheuidtest != '102' )
 
 #order is essential there: --setugids then --setperms, or suid guid perms will be lost
 warn "failed to fix user group ids for apache" unless (
-     system("/bin/rpm --setugids httpd mod_auth_tkt mod_ssl php pwauth 2> /dev/null") == 0
+     system("/bin/rpm --setugids httpd mod_auth_tkt mod_ssl pwauth 2> /dev/null") == 0
      );
 warn "failed to fix permissions for apache" unless (
-     system("/bin/rpm --setperms httpd mod_auth_tkt mod_ssl php pwauth 2> /dev/null") == 0
+     system("/bin/rpm --setperms httpd mod_auth_tkt mod_ssl pwauth 2> /dev/null") == 0
      );
 
 # delete unwanted user accounts

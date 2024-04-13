@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 6
+%define release 7
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -181,6 +181,9 @@ fi
 
 
 %changelog
+* Sat Apr 13 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-7.sme
+- fix init-accounts [SME: 12546]
+
 * Thu Apr 04 2024 Brian Read <brianr@koozali.org> 11.0.0-6.sme
 - Update createlinks to create smeserver-package-update event[SME: 12579]
 
