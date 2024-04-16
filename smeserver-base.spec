@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 7
+%define release 8
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -39,6 +39,7 @@ Requires: smeserver-bootloader
 Requires: mdadm
 Requires: pv
 Requires: dhcp-server
+Requires: dhcp-client
 Requires: diald
 Requires: /usr/bin/passwd
 Requires: nss-pam-ldapd
@@ -63,7 +64,8 @@ BuildRequires: perl, perl(Test::Inline) >= 0.12
 BuildRequires: smeserver-devtools >= 1.13.1-03
 BuildRequires: gettext
 Requires: gdisk
-
+Requires: ppp
+Requires: rp-pppoe 
 %define dbfiles accounts configuration domains hosts networks
 AutoReqProv: no
 
@@ -101,6 +103,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/etc/selinux
 (cd root   ; find . -depth -print | cpio -dump $RPM_BUILD_ROOT)
 /sbin/e-smith/genfilelist $RPM_BUILD_ROOT \
+    --file /sbin/e-smith/systemd/network-pre 'attr(0554,root,root)' \
     --file /sbin/e-smith/systemd/mdmonitor-pre 'attr(0554,root,root)' \
     --file /sbin/e-smith/systemd/rsyslog-pre 'attr(0554,root,root)' \
     --file /etc/cron.daily/conf-mod_ssl 'attr(0544,root,root)' \
@@ -181,6 +184,11 @@ fi
 
 
 %changelog
+* Tue Apr 16 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-8.sme
+- add requirement for ppp [SME: 12622]
+- add requirement for rp-pppoe [SME: 12628]
+- enable modprobe dummy and bond [SME: 12627] 
+
 * Sat Apr 13 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-7.sme
 - fix init-accounts [SME: 12546]
 

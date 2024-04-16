@@ -7,6 +7,7 @@ Conflicts=NetworkManager.service
 
 [Service]
 Type=oneshot
+ExecStartPre=/sbin/e-smith/systemd/network-pre
 ExecStart=/etc/rc.d/init.d/network start
 ExecStop=/etc/rc.d/init.d/network stop
 ExecReload=/etc/rc.d/init.d/network restart

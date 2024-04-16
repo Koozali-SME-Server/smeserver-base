@@ -64,6 +64,7 @@ foreach (qw(
     /etc/resolv.conf
     /etc/sysctl.conf
     /var/service/wan/dhclient.config
+    /lib/modprobe.d/systemd.conf
     ))
 {
     templates2events($_, qw(console-save bootstrap-console-save smeserver-base-update));

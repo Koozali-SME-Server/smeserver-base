@@ -1,0 +1,5 @@
+# Do the same for dummy0.
+# KOOZALI SME Server,we do use it too, so enabling
+
+options dummy numdummies=1
+
