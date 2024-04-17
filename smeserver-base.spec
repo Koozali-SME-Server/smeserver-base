@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 8
+%define release 9
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Wed Apr 17 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-9.sme
+- fix self-signed cert renewd when not necessary [SME: 12606]
+
 * Tue Apr 16 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-8.sme
 - add requirement for ppp [SME: 12622]
 - add requirement for rp-pppoe [SME: 12628]

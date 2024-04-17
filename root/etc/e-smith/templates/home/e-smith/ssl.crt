@@ -4,6 +4,8 @@
     use Date::Parse;
     use Cwd;
     use Net::IP qw(ip_is_ipv4 ip_is_ipv6);
+    use esmith::Logger;
+    tie *FH, 'esmith::Logger';
     my $here = getcwd;
 
     my $Country = $modSSL{Country} || "--";
@@ -52,16 +54,16 @@
 	my $key_md5 = `openssl rsa -noout -modulus -in $key | openssl md5`;
 
         if ( ($ttl_days > 2) && ( "$crt_md5" eq "$key_md5" ) ) {
-            my $expected_issuer = '/C='.$Country .
-                              '/ST='.$State;
-            $expected_issuer .= '/L=' . ($defaultCity ? $defaultCity : 'Default City');
-            $expected_issuer .= '/O=' . ($defaultCompany ? $defaultCompany : 'Default Company Ltd');
-            $expected_issuer .= "/OU=$defaultDepartment" if $defaultDepartment;
-            $expected_issuer .= "/CN=$commonName" .
-                                  "/emailAddress=$email";
+            my $expected_issuer = 'C = '.$Country .
+                              ', ST = '.$State;
+            $expected_issuer .= ', L = ' . ($defaultCity ? $defaultCity : 'Default City');
+            $expected_issuer .= ', O = ' . ($defaultCompany ? $defaultCompany : 'Default Company Ltd');
+            $expected_issuer .= ", OU = $defaultDepartment" if $defaultDepartment;
+            $expected_issuer .= ", CN = $commonName" .
+                                  ", emailAddress = $email";
             my $issuer = `openssl x509 -issuer -noout -in $crt`;
             chomp $issuer;
-            $issuer =~ s/^issuer= //;
+            $issuer =~ s/^issuer=//;
             my $signatureAlg = `openssl x509 -text -noout -in $crt | grep "Signature Algorithm" | head -1`;
             chomp $signatureAlg;
             $signatureAlg =~ s/^ *Signature Algorithm: //;
@@ -70,6 +72,9 @@
             # openssl x509 -text -noout -in /etc/dehydrated/certs/domain/cert.pem | sed -ne '/X509v3 Subject Alternative Name/{ N;s/^.*\n//;:a;s/^\( *\)\(.*\), /\2,\1/;ta;p;q; }'
 	    $expected_subjectAltName = `openssl x509 -text -noout -in $crt | sed -ne '/X509v3 Subject Alternative Name/{ N;s/^.*\\n//;:a;s/^\\( *\\)\\(.*\\), /\\2,\\1/;ta;p;q; }'`;
 	    chomp $expected_subjectAltName;
+            print FH "Self-Signed Cert: $issuer\n expected $expected_issuer" unless ($issuer eq $expected_issuer);
+            print FH "Self-Signed Cert: $signatureAlg "unless ($signatureAlg ne "sha1WithRSAEncryption");
+            print FH "Self-Signed Cert: $subjectAltName\n expected: $expected_subjectAltName" unless ($subjectAltName eq $expected_subjectAltName);
             if (
 	                 ($issuer eq $expected_issuer)
 	              && ($signatureAlg ne "sha1WithRSAEncryption")
@@ -117,4 +122,5 @@
     }
     close(SSL) or die "Closing openssl pipe reported: $!";
     chdir $here;
+    close FH;
 }
