@@ -22,29 +22,17 @@ use strict;
 use Errno;
 use esmith::AccountsDB;
 use esmith::ConfigDB;
-use Net::LDAP;
 use esmith::util;
+use utf8;
+use esmith::util::ldap;
 
 my $conf = esmith::ConfigDB->open or die "Could not open configuration db";
 
 my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value
 
-my $domain = $conf->get('DomainName')
-    || die("Couldn't determine domain name");
-$domain = $domain->value;
-
 # prepare LDAP bind
-my $pw = esmith::util::LdapPassword();
-my $base = esmith::util::ldapBase ($domain);
-
-my $ldap = Net::LDAP->new('localhost')
-    or die "$@";
-
-$ldap->bind(
-    dn => "cn=root,$base",
-    password => $pw
-);
+my $ldap=esmith::util::ldap->new();
 
 my $event = $ARGV [0];
 my $userName = $ARGV [1];
@@ -94,22 +82,14 @@ foreach my $u (@users)
             system("/usr/sbin/usermod", '-s', "$new_shell", $userName) == 0
                 or ( $x = 255, warn "Failed to modify shell of (unix) account $userName.\n" );
         }
-
-        my @new_shell = ($new_shell);
-        $result = $ldap->modify("uid=$userName,ou=Users,$base",
-                      replace => {
-                          loginShell => \@new_shell
-                      }
-        );
-        $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify shell of (ldap) account $userName.\n" );
     }
 
     #------------------------------------------------------------
     # Modify user's first name and last name if required,
     # in /etc/passwd using "usermod"
     #------------------------------------------------------------
-    my $first = $u->prop('FirstName') || "";
-    my $last = $u->prop('LastName') || "";
+    my $first = stringToASCII($u->prop('FirstName') || "");
+    my $last = stringToASCII($u->prop('LastName') || "");
     my $new_comment = "$first $last";
 
     unless ($comment eq $new_comment)
@@ -119,36 +99,11 @@ foreach my $u (@users)
             system("/usr/sbin/usermod", "-c", "$first $last", $userName) == 0
                 or ( $x = 255, warn "Failed to modify comment of (unix) account $userName.\n" );
         }
-
-        my @new_comment = ($new_comment);
-        my @first = ($first);
-        my @last = ($last);
-        $result = $ldap->modify("uid=$userName,ou=Users,$base",
-                      replace => {
-                          givenName => \@first,
-                          sn => \@last,
-                          cn => \@new_comment,
-                          displayName => \@new_comment
-                      }
-        );
-        $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify comment/name of (ldap) account $userName.\n" );
     }
 
-    my @new_phone = ($u->prop('Phone')) || ();
-    my @new_company = ($u->prop('Company')) || ();
-    my @new_dept = ($u->prop('Dept')) || ();
-    my @new_city = ($u->prop('City')) || ();
-    my @new_street = ($u->prop('Street')) || ();
-    $result = $ldap->modify("uid=$userName,ou=Users,$base",
-                            replace => {
-                                telephoneNumber => \@new_phone,
-                                o => \@new_company,
-                                ou => \@new_dept,
-                                l => \@new_city,
-                                street => \@new_street
-                            }
-    );
-    $result->code && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify email of (ldap) account $userName.\n" );
+    # we do all the test in ldap pm to avoid 3 differents write access, which are costly.
+    $result = $ldap->ldapuser($u);
+    $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify email of (ldap) account $userName.\n" );
 
 }
 

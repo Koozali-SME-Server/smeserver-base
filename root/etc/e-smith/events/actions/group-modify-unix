@@ -2,6 +2,7 @@
 
 #----------------------------------------------------------------------
 # copyright (C) 2002-2005 Mitel Networks Corporation
+# copyright (C) 2024 Koozali Foundation inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,17 +28,19 @@ use strict;
 use Errno;
 use esmith::ConfigDB;
 use esmith::AccountsDB;
-use File::Temp;
+use esmith::util;
+use utf8;
+use esmith::util::ldap;
 
 my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
 my $a = esmith::AccountsDB->open_ro || die "Couldn't open accounts db\n";
 
 my $ldapauth = $c->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value
+my $result;
 
-my $domain = $c->get('DomainName')
-    || die("Couldn't determine domain name");
-$domain = $domain->value;
+# prepare LDAP bind
+my $ldap=esmith::util::ldap->new();
 
 my $event = shift || die "Event name arg missing\n";;
 my @groups;
@@ -78,22 +81,12 @@ foreach my $group (@groups)
             or ( $x = 255, warn "Failed to modify (unix) group description for $groupName.\n" );
     }
 
-    my $tmpattr = File::Temp->new();
-    print $tmpattr "cn: $groupDesc\n";
-    $tmpattr->flush();
-    system("/usr/sbin/cpu", "-C/etc/cpu-system.conf", "usermod", "-a", "$tmpattr", "$groupName") == 0
-        or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description for $groupName.\n" );
-
-    $tmpattr = File::Temp->new();
-    print $tmpattr "mail: $groupName\@$domain\n";
-    print $tmpattr "description: $groupDesc\n";
-    $tmpattr->flush();
-    system(
-            "/usr/sbin/cpu", "-C/etc/cpu-system.conf", "groupmod", 
-            "-a", "$tmpattr",
-            "$groupName"
-        ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description/email for $groupName.\n" );
-    undef $tmpattr;
+    # modify group dedicated user cn
+    $result = $ldap->ldapmoduser($group);
+    $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description for $groupName.\n" );
+    # modify Group description and mail
+    $result = $ldap->ldapmodgroup($group);
+    $result  && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description/email for $groupName.\n" );
 
     my ($name, $passwd, $gid, $members) = getgrnam ($groupName);
     my @oldMembers = split (/\s+/, $members);
@@ -116,7 +109,11 @@ foreach my $group (@groups)
     {
 	$oldMembers{$member} = 1;
     }
-    my (@addMembers, @delMembers);
+
+    # applying list of user memberUid for LDAP for this group
+    $result = $ldap->ldapsetgroupmembers($groupName,\@newMembers);
+    # error code 20 is entry already exits.
+    $result &&  ( $result->code != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify supplementary (ldap) group membership for $groupName.\n" );
 
     foreach $member (@newMembers, @oldMembers)
     {
@@ -157,13 +154,8 @@ foreach my $group (@groups)
                 or ( $x = 255, warn "Failed to modify supplementary (unix) group list for $member.\n" );
         }
 
-        # root user/group isn't in ldap
-        @groupList = grep (!/^root$/, @groupList);
-        $groups = join (',', sort (@groupList));
-
-        system("/usr/sbin/cpu", "-C/etc/cpu-system.conf", "usermod", "-G", "$groups", "$member") == 0
-            or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify supplementary (ldap) group list for $member.\n" );
     }
-}
+
+} # end of list of groups
 
 exit ($x);

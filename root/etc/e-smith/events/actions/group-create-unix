@@ -2,6 +2,7 @@
 
 #----------------------------------------------------------------------
 # copyright (C) 1999-2005 Mitel Networks Corporation
+# copyright (C) 2024 Koozali foundation inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +28,8 @@ use strict;
 use Errno;
 use esmith::ConfigDB;
 use esmith::AccountsDB;
-use File::Temp;
+use esmith::util::ldap;
+use esmith::util;
 
 my $conf = esmith::ConfigDB->open_ro
     or die "Could not open Config DB";
@@ -36,10 +38,10 @@ my $accounts = esmith::AccountsDB->open
 
 my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value
+my $result;
 
-my $domain = $conf->get('DomainName')
-    || die("Couldn't determine domain name");
-$domain = $domain->value;
+# prepare LDAP bind
+my $ldap=esmith::util::ldap->new();
 
 my $event = $ARGV [0];
 my $groupName = $ARGV [1];
@@ -97,41 +99,20 @@ if ($ldapauth ne 'enabled')
         ) == 0 or ( $x = 255, warn "Failed to create (unix) user $groupName.\n" );
 }
 
-# Create the user's unique group first (in ldap)
-my $tmpattr = File::Temp->new();
-print $tmpattr "mail: $groupName\@$domain\n";
-print $tmpattr "description: $description\n";
-$tmpattr->flush();
-system(
-        "/usr/sbin/cpu", "groupadd",
-        "-a", "$tmpattr",
-        "-g", $gid,
-        $groupName
-    ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) group $groupName.\n" );
-undef $tmpattr;
+# create group
+$result = $ldap->ldapgroup($group);
+$result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) group $groupName.\n" );
 
-# Now create the dummy user account (in ldap)
-system(
-        "/usr/sbin/cpu", "-C/etc/cpu-system.conf", "useradd",
-        "-u", $uid,
-        "-g", $gid,
-        "-d",
-        "/home/e-smith",
-        "-s",
-        "/bin/false",
-        "$groupName"
-    ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) user $groupName.\n" );
+#create dedicated group user
+$result = $ldap->ldapuser($group);
+$result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) user $groupName.\n" );
 
-# Set the cn of the dummy user account (in ldap)
-$tmpattr = File::Temp->new();
-print $tmpattr "cn: $description\n";
-$tmpattr->flush();
-system( 
-        "/usr/sbin/cpu", "-C/etc/cpu-system.conf", "usermod",
-        "-a", $tmpattr,
-        "$groupName"
-    ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to update (ldap) user $groupName.\n" );
-undef $tmpattr;
+# add to supplementary group
+# as it is regular group, pm will add www and admin, so no need to add it
+my @UserArr = ($groupName);
+$result = $ldap->ldapsetgroupmembers($groupName,\@UserArr);
+# error code 20 is entry already exits.
+$result  &&  ( $result->code != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to add (ldap) account $groupName to supplementary group.\n" );
 
 # Release lock if we have one
 $lock && esmith::lockfile::UnlockFile($lock);
@@ -150,8 +131,7 @@ my @groupMembers = split (/,/, $members);
 # "www" and "admin" are implicit members of all groups
 push @groupMembers, 'admin', 'www';
 
-my $member;
-foreach $member (@groupMembers)
+foreach my $member (@groupMembers)
 {
     # Get a list of this member's supplementary groups, then add the
     # new group to the list. Finally sort, join and run the usermod
@@ -179,13 +159,6 @@ foreach $member (@groupMembers)
         system("/usr/sbin/usermod", "-G", "$groups", "$member") == 0
             or ( $x = 255, warn "Failed to modify supplementary (unix) group list for $member.\n" );
     }
-
-    # root user/group isn't in ldap
-    @groupList = grep (!/^root$/, @groupList);
-    $groups = join (',', sort (@groupList));
-
-    system("/usr/sbin/cpu", "-C/etc/cpu-system.conf", "usermod", "-G", "$groups", "$member") == 0
-        or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify supplementary (ldap) group list for $member.\n" );
 }
 
 exit ($x);

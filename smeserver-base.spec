@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 9
+%define release 10
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -15,7 +15,7 @@ Source: %{name}-%{version}.tar.xz
 
 BuildRoot: /var/tmp/%{name}-%{version}-%{release}-buildroot
 Requires: pwauth
-Requires: smeserver-lib >= 2.2.0-2
+Requires: smeserver-lib >= 11.0.0-7
 Requires: server-manager-images, server-manager
 Requires: smeserver-formmagick >= 1.4.0-12
 Requires: plymouth
@@ -50,7 +50,7 @@ Requires: smeserver-runit >= 2.6.0-7
 Requires: smeserver-php >= 3.0.0-22
 Requires: smeserver-yum >= 2.6.0-43 
 Obsoletes: nss_ldap < 254
-Requires: cpu >= 1.4.3
+Obsoletes: cpu
 Obsoletes: rlinetd, e-smith-mod_ssl
 Obsoletes: e-smith-serial-console
 Obsoletes: sshell
@@ -184,6 +184,11 @@ fi
 
 
 %changelog
+* Wed May 15 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-10.sme
+- fix user@0.service failed to start [SME: 12568]
+- stop loging in audit crond success
+- drop cpu and use esmith:util::ldap [SME: 12663]
+
 * Wed Apr 17 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-9.sme
 - fix self-signed cert renewd when not necessary [SME: 12606]
 

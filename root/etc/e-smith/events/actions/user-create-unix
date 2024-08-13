@@ -2,6 +2,7 @@
 
 #----------------------------------------------------------------------
 # copyright (C) 1999-2005 Mitel Networks Corporation
+# copyright (C) 2024 Koozali foundation inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +28,9 @@ use strict;
 use Errno;
 use esmith::ConfigDB;
 use esmith::AccountsDB;
-use File::Temp;
+use esmith::util;
+use utf8;
+use esmith::util::ldap;
 
 my $conf = esmith::ConfigDB->open_ro;
 my $accounts = esmith::AccountsDB->open;
@@ -35,9 +38,8 @@ my $accounts = esmith::AccountsDB->open;
 my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value
 
-my $domain = $conf->get('DomainName')
-    || die("Couldn't determine domain name");
-$domain = $domain->value;
+# prepare LDAP bind
+my $ldap=esmith::util::ldap->new();
 
 my $event = $ARGV [0];
 my $userName = $ARGV [1];
@@ -65,13 +67,13 @@ unless ($uid = $acct->prop('Uid'))
     $acct->set_prop('Uid', $uid);
 }
 my $gid = $acct->prop('Gid') || $uid;
-my $first = $acct->prop('FirstName') || '';
-my $last = $acct->prop('LastName') || '';
-my $phone = $acct->prop('Phone') || '';
-my $company = $acct->prop('Company') || '';
-my $dept = $acct->prop('Dept') || '';
-my $city = $acct->prop('City') || '';
-my $street = $acct->prop('Street') || '';
+my $first = stringToASCII($acct->prop('FirstName')) || '';
+my $last = stringToASCII($acct->prop('LastName')) || '';
+my $phone = stringToASCII($acct->prop('Phone')) || '';
+my $company = stringToASCII($acct->prop('Company')) || '';
+my $dept = stringToASCII($acct->prop('Dept')) || '';
+my $city = stringToASCII($acct->prop('City')) || '';
+my $street = stringToASCII($acct->prop('Street')) || '';
 my $shell = $acct->prop('Shell') || '/usr/bin/false';
 my $groups = "shared";
 
@@ -101,38 +103,17 @@ if ($ldapauth ne 'enabled')
 }
 
 # Create the user's unique group first (in ldap)
-system(
-        "/usr/sbin/cpu", "-C/etc/cpu-system.conf", "groupadd",
-        "-g",
-        $gid,
-        $userName
-    ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) group $userName.\n" );
+my $result = $ldap->ldapgroup($acct);
+$result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) group $userName.\n" );
 
 # Now create the user account (in ldap)
-my $tmpattr = File::Temp->new();
-print $tmpattr "telephoneNumber: $phone\n";
-print $tmpattr "o: $company\n";
-print $tmpattr "ou: $dept\n";
-print $tmpattr "l: $city\n";
-print $tmpattr "street: $street\n";
-$tmpattr->flush();
-system(
-        "/usr/sbin/cpu", "useradd",
-        "-u", $uid,
-        "-g", $gid,
-        "-f", "$first",
-        "-E", "$last",
-        "-e", "$userName\@$domain",
-        "-a", "$tmpattr",
-        "-d", "/home/e-smith/files/users/$userName",
-        "-G", "$groups",
-        "-m",
-        "-k/etc/e-smith/skel/user",
-        "-s", "$shell",
-        $userName
-    ) == 0 or ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) account $userName.\n" );
-undef $tmpattr;
+$result = $ldap->ldapuser($acct);
+$result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (ldap) account $userName.\n" );
 
+# add to supplementary group
+my @UserArr = ($userName);
+$result = $ldap->ldapsetgroupmembers($userName,\@UserArr);
+$result &&  ( $result != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to add (ldap) account $userName to supplementary group.\n" );
 
 # Release lock if we have one
 $lock && esmith::lockfile::UnlockFile($lock);
@@ -141,13 +122,15 @@ $lock && esmith::lockfile::UnlockFile($lock);
 
 chmod 0700, "/home/e-smith/files/users/$userName";
 
+# lock user password
 if ($ldapauth ne 'enabled')
 {
     system("/usr/bin/passwd", "-l", "$userName")
         and ( $x = 255, warn "Could not lock (unix) password for $userName\n" );
 }
-system("/usr/sbin/cpu", "usermod", "-L", "$userName")
-    and ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Could not lock (ldap) password for $userName\n" );
+
+# esmith::util::ldap already lock user on creation, this avoid one more ldap write access.
+
 system("/usr/bin/smbpasswd", "-a", "-d", "$userName")
     and ( $x = 255, warn "Could not lock (smb) password for $userName\n" );
 
