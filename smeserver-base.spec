@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 10
+%define release 11
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Tue Aug 13 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-11.sme
+- fix new systemd.log does not fill after log rotate [SME: 12688]
+
 * Wed May 15 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-10.sme
 - fix user@0.service failed to start [SME: 12568]
 - stop loging in audit crond success
