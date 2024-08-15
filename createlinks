@@ -309,6 +309,7 @@ templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $even
 event_link("systemd-journald", $event, "02");
 event_link("fix-startup", $event, "05");
 event_link("init-accounts", $event, "05");
+event_link("mail-spool-fix", $event, "05");
 event_link("logrotate-migrate", $event, "06");
 event_link("rotate_logfiles", $event, "07");
 event_link("set-hostname", $event, "10");

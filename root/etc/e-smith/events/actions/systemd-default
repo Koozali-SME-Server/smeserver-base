@@ -105,7 +105,7 @@ foreach my $filen (reverse sort keys %files) {
 	    my $multiple = $service;
 	    ($multiple = $service ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $service =~ /@/ );
 	    #print "$stats $service $multiple\n";
-	    next unless ( -e "/usr/lib/systemd/system/$service" or -e "/etc/lib/systemd/system/$service" or -e "/usr/lib/systemd/system/$multiple");
+	    next unless ( -e "/usr/lib/systemd/system/$service" or -e "/etc/systemd/system/$service" or -e "/usr/lib/systemd/system/$multiple");
 	    # eliminate duplicates, this way we keep only the last entry of the lowest file as we do it in reverse order of file,
 	    # but from top to bottom of file.
 	    $services{$service}=$stats;

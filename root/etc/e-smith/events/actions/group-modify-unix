@@ -54,6 +54,11 @@ else
     @groups = $a->groups;
 }
 
+# fix www missing in shared
+my ( $name,   $passwd,   $gid,       $members  ) = getgrnam('shared');
+my @mb= split(/ /, $members);
+system("usermod -a -G shared www") unless ( grep(/^www$/, @mb) ) ;
+
 foreach my $group (@groups)
 {
     my $groupName = $group->key;
@@ -125,18 +130,23 @@ foreach my $group (@groups)
 	# We need to add or remove this member from the group
 	# Get the supplementary group list for the member we are adding or
 	# deleting.
-	my $cmd = "/usr/bin/id -G -n '$member'";
+	#my $cmd = "/usr/bin/id -G -n '$member'";
+  # this will not fail in case of apache before www in passwd
+  my $cmd = "/usr/bin/groups '$member'"; 
 	my $groups = `$cmd 2>/dev/null`; 
 	if ($? != 0)
 	{
 	    die "Failed to get supplementary group list for $member.\n";
 	}
+  $groups =~ s/^.*:\s+//;
 	chomp ($groups);
 
 	my @groupList = split (/\s+/, $groups);
 	@groupList = grep (!/^$member$/, @groupList);
 	# Apache is an alias for www
 	@groupList = map { $_ =~ s/^apache$/www/g; $_ } @groupList;
+  # www needs to be in shared
+  push(@groupList,'shared') if ( ($member eq 'www') and (! grep{$_ eq 'shared'} @groupList));
 
 	if ($oldMembers{$member})
 	{

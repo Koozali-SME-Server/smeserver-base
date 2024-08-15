@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 11
+%define release 12
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,12 @@ fi
 
 
 %changelog
+* Wed Aug 14 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-12.sme
+- fix 3 regressions from SME10 [SME: 12654]
+  fix www missing from shared and few groups [SME: 12146]
+  fix group deletion leaves mail spool file [SME: 12431]
+  fix path to /etc/systemd for seeking service files [SME: 12421]
+
 * Tue Aug 13 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-11.sme
 - fix new systemd.log does not fill after log rotate [SME: 12688]
 

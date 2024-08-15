@@ -59,4 +59,7 @@ $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete dumm
 $result = $ldap->ldapdelgroup($groupName);
 $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete (ldap) group $groupName.\n" );
 
+# delete mail spool file
+unless ($x == 255) { unlink("/var/spool/mail/$groupName") or ( $x = 255, warn "Failed to delete /var/spool/mail/$groupName.\n" );}
+
 exit ($x);
