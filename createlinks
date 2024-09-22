@@ -326,6 +326,7 @@ event_link("conf-routes", $event, "89");
 event_link("systemd-default", $event, "88");
 event_link("systemd-isolate", $event, "89");
 event_link("systemd-reload", $event, "89");
+event_link("fix-noise-el8", $event, "89");
 event_link("raidmonitor-check", $event, "92");
 
 safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/network");
@@ -458,6 +459,7 @@ event_link("conf-modules", $event, "30");
 event_link("create-mnt-floppy", $event, "50");
 event_link("systemd-default", $event, "88");
 event_link("systemd-reload", $event, "89");
+event_link("fix-noise-el8", $event, "89");
 
 #--------------------------------------------------
 # actions for post-upgrade event
@@ -470,6 +472,7 @@ templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $even
 event_link("systemd-journald", $event, "02");
 event_link("fix-startup", $event, "05");
 event_link("init-accounts", $event, "05");
+event_link("mail-spool-fix", $event, "05");
 event_link("logrotate-migrate", $event, "06");
 event_link("rotate_logfiles", $event, "07");
 event_link("conf-startup", $event, "10");
@@ -513,6 +516,7 @@ $event = "user-create";
 event_link("user-create-unix", $event, "04");
 event_link("count-active-user-accounts", $event, "25");
 event_link("user-group-modify", $event, "85");
+event_link("mail-spool-fix", $event, "89");
 
 #--------------------------------------------------
 # actions for user-delete event
@@ -524,6 +528,7 @@ event_link("user-delete-groups-and-pseudonyms", $event, "02");
 event_link("user-delete-unix", $event, "15");
 event_link("initialize-default-databases", $event, "23");
 event_link("count-active-user-accounts", $event, "25");
+event_link("mail-spool-fix", $event, "89");
 
 #--------------------------------------------------
 # actions for user-modify event
@@ -625,6 +630,7 @@ templates2events("/home/e-smith/ssl.pem/pem", $event);
 $event = "email-update";
 event_link("systemd-default", $event, "88");
 event_link("systemd-reload", $event, "89");
+event_link("mail-spool-fix", $event, "89");
 
 #--------------------------------------------------
 # actions for webapps-update event

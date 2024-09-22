@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 12
+%define release 13
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,11 @@ fi
 
 
 %changelog
+* Sun Sep 22 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-13.sme
+- fix mail spool perms [SME: 12654]
+- fix motd noise related to cockpit [SME: 12575]
+- fix /run vs /var/run temps dir noise [SME: 12639]
+
 * Wed Aug 14 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-12.sme
 - fix 3 regressions from SME10 [SME: 12654]
   fix www missing from shared and few groups [SME: 12146]

@@ -1,0 +1,47 @@
+#! /bin/bash
+
+#----------------------------------------------------------------------
+# copyright (C) 2023 Koozali SME Server
+#               
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#               
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#               
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+# 
+#----------------------------------------------------------------------
+
+# fix ownership of spool folder content
+pushd /var/spool/mail/ >/dev/null
+for file in *; do
+  if [ ! -f "$file" ]; then
+    continue
+  fi
+  if ( ! `id -u $file 2>/dev/null 1>&2`) ; then
+    echo "$file user does not exist deleting mail spool file" 
+    rm -f /var/spool/mail/$file
+    continue
+  fi
+  userf=$(stat -c %U /var/spool/mail/$file 2>/dev/null)
+  if [[ "$userf" != "$file" ]]; then
+    uidf=$(stat -c %u /var/spool/mail/$file 2>/dev/null)
+    uiduser=$(id -u $file 2>/dev/null )
+    # extra step needed if username has an alias eg www=apache
+    if [[ "$uidf" != "$uiduser" ]]; then
+    echo "fixing ownership of $file spool mail"
+    # extra security we want to clean it from sensitive information
+    echo ""> /var/spool/mail/$file
+    chown $file /var/spool/mail/$file
+    fi
+  fi
+done
+popd >/dev/null
+

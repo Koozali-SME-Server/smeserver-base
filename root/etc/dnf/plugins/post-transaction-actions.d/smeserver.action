@@ -1,0 +1,2 @@
+# cockpit noise [SME: 12575]
+cockpit-ws:any:ln -sfn /dev/null /etc/motd.d/cockpit 

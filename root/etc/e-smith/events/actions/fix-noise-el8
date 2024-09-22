@@ -1,0 +1,4 @@
+#!/bin/bash
+# remove cockpit alert forever [SME: 12575]
+ln -sfn /dev/null /etc/motd.d/cockpit 
+
