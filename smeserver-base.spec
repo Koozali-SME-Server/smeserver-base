@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 13
+%define release 14
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Mon Sep 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-14.sme
+- fix result variable not initialized [SME: 12663]
+
 * Sun Sep 22 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-13.sme
 - fix mail spool perms [SME: 12654]
 - fix motd noise related to cockpit [SME: 12575]
