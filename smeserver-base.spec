@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 14
+%define release 15
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,10 @@ fi
 
 
 %changelog
+* Sat Dec 21 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-15.sme
+- fix use of passwd command when ldap auth enabled [SME: 6453]
+- delete spool file only if exists to avoid error [SME: 12763]
+
 * Mon Sep 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-14.sme
 - fix result variable not initialized [SME: 12663]
 
