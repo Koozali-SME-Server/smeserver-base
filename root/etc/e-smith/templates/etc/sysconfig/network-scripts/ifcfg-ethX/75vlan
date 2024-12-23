@@ -1,0 +1,4 @@
+{
+  return unless ($is_vlan eq  "yes");
+  $OUT = "VLAN=yes\n";
+}

@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 16
+%define release 17
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Mon Dec 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-17.sme
+- add vlan support on External Interface [SME: 12677]
+
 * Mon Dec 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-16.sme
 -  add kernel module support for rp-pppoe plugin [SME: 12678]
    will allow faster fiber connexion when using multiple queue interface (RSS)

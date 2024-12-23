@@ -18,6 +18,15 @@ if (($c->get('EthernetDriver1')->value || 'unknown') eq 'dummy'){
 if (($c->get('InternalInterface')->prop('NICBonding') || 'disabled') eq 'enabled'){
   push @adapters, "bond\tbond\t10:00:01:02:03:04\tBonding virtual Interface\tbond0";
 }
+# if external VLAN is configured
+if (($c->get('ExternalInterface')->prop('VLAN') || 'disabled') ne 'disabled'){
+  my $name= ($c->get('ExternalInterface')->prop('Name') eq "ppp0") ? $c->get('pppoe')->prop('PhysicalInterface')  : $c->get('ExternalInterface')->prop('Name') ;
+  my $vlan=$c->get('ExternalInterface')->prop('VLAN');
+  $name=~ s/\.$vlan$//;
+  my ($newl) = grep ( /$name$/ , @adapters);
+  push @adapters, "$newl.$vlan";
+}
+#TODO if external virtual lan is configured
 
 # Expand templates for every adapters found
 foreach my $adapter (@adapters){

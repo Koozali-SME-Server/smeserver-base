@@ -559,9 +559,37 @@ ETHERNET_EXTERNAL:
         goto ETHERNET_EXTERNAL;
     }
 
+    goto ETHERNET_EXTERNAL_VLAN;# was SERVER_GATEWAY_DEDICATED;
+}
+#------------------------------------------------------------
+ETHERNET_EXTERNAL_VLAN:
+#------------------------------------------------------------
+{
+    ($rc, $choice) = $console->input_page
+        (
+         title  => gettext("Select External Interface VLAN"),
+         text   =>
+         gettext("Your ISP might have provided you a VLAN to use, if not leave empty."),
+         value   => $db->get_prop('ExternalInterface', 'VLAN') || ""
+        );
+
+    goto ETHERNET_EXTERNAL unless ($rc == 0);
+    # sanitize if a previous VLAN is present
+    my $extIF = $db->get_prop('ExternalInterface', 'Name');
+    $extIF =~  s/\.\d+$//;
+    if ( $choice =~ /^\d+$/ ) 
+    {
+       $db->set_prop('ExternalInterface', 'VLAN', $choice );
+       $db->set_prop('ExternalInterface', 'Name',  $extIF . ".$choice") unless $db->get_prop('ExternalInterface', 'Name') =~ /\.$choice$/; 
+    }
+    else 
+    {
+       $db->delete_prop('ExternalInterface', 'VLAN');
+       $db->set_prop('ExternalInterface', 'Name',$extIF);
+    }
+    
     goto SERVER_GATEWAY_DEDICATED;
 }
-
 #------------------------------------------------------------
 SERVER_GATEWAY_DEDICATED:
 #------------------------------------------------------------

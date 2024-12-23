@@ -1,0 +1,10 @@
+{
+    $is_vlan = "no";
+    if ( ( exists $ExternalInterface{VLAN} && $ExternalInterface{VLAN} =~ /^\d+$/ ) && ($is_external || ( $ExternalInterface{Configuration} eq "pppoe") && $pppoe{PhysicalInterface}  eq $THIS_DEVICE ) )
+    {
+	$ifup_this_device = "yes";
+        $is_vlan = "yes";
+    }
+
+    "";
+}
