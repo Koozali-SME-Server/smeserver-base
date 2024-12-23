@@ -1,0 +1,2 @@
+# add pppoe module
+/sbin/modprobe pppoe

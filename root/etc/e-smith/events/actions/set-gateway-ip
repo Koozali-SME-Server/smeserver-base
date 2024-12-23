@@ -34,7 +34,7 @@
 # remote_ip = $6
 # ipparam = $7
 
-if [ "$7" = "diald" ]
+if [ "$7" = "diald" ] || [ "$7" = "wan" ]
 then
     exec /sbin/e-smith/config set GatewayIP "$6"
 fi

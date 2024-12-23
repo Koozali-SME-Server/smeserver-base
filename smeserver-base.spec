@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 15
+%define release 16
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,12 @@ fi
 
 
 %changelog
+* Mon Dec 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-16.sme
+-  add kernel module support for rp-pppoe plugin [SME: 12678]
+   will allow faster fiber connexion when using multiple queue interface (RSS)
+   set-gateway-ip will propagate both wan and diald ip
+   run.pppoe call an interface
+
 * Sat Dec 21 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-15.sme
 - fix use of passwd command when ldap auth enabled [SME: 6453]
 - delete spool file only if exists to avoid error [SME: 12763]
