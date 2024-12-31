@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 18
+%define release 19
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Tue Dec 31 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-19.sme
+- fix www removed from shared on group creation [SME: 12848]
+
 * Mon Dec 23 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-18.sme
 - add vlan support on External Interface [SME: 12677]
 - fix typo [SME: 12763] 

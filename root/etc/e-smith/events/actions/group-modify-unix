@@ -131,22 +131,22 @@ foreach my $group (@groups)
 	# Get the supplementary group list for the member we are adding or
 	# deleting.
 	#my $cmd = "/usr/bin/id -G -n '$member'";
-  # this will not fail in case of apache before www in passwd
-  my $cmd = "/usr/bin/groups '$member'"; 
+	# this will not fail in case of apache before www in passwd
+	my $cmd = "/usr/bin/groups '$member' 2>/dev/null | cut -d' ' -f3- "; 
 	my $groups = `$cmd 2>/dev/null`; 
 	if ($? != 0)
 	{
 	    die "Failed to get supplementary group list for $member.\n";
 	}
-  $groups =~ s/^.*:\s+//;
+	$groups =~ s/^.*:\s+//;
 	chomp ($groups);
 
 	my @groupList = split (/\s+/, $groups);
 	@groupList = grep (!/^$member$/, @groupList);
 	# Apache is an alias for www
 	@groupList = map { $_ =~ s/^apache$/www/g; $_ } @groupList;
-  # www needs to be in shared
-  push(@groupList,'shared') if ( ($member eq 'www') and (! grep{$_ eq 'shared'} @groupList));
+	# www needs to be in shared
+	push(@groupList,'shared') if ( ($member eq 'www') and (! grep{$_ eq 'shared'} @groupList));
 
 	if ($oldMembers{$member})
 	{

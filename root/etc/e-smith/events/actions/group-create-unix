@@ -137,7 +137,9 @@ foreach my $member (@groupMembers)
     # new group to the list. Finally sort, join and run the usermod
     # function to update the group list for this member.
 
-    my $cmd = "/usr/bin/id -G -n '$member'";
+    #my $cmd = "/usr/bin/id -G -n '$member'";
+    # this will not fail in case of apache aliase before www in passwd
+    my $cmd = "/usr/bin/groups '$member' 2>/dev/null | cut -d' ' -f3- ";
     my $groups = `$cmd 2>/dev/null`; 
     if ($? != 0)
     {
