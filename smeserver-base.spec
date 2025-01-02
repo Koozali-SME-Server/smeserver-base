@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 19
+%define release 20
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,10 @@ fi
 
 
 %changelog
+* Thu Jan 02 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-20.sme
+- Primary default to SSL required and redirect [SME: 12858]
+- cleanup remove primary=system [SME: 8268]
+
 * Tue Dec 31 2024 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-19.sme
 - fix www removed from shared on group creation [SME: 12848]
 
