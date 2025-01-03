@@ -54,7 +54,9 @@ if (!symlink($old_qfn, $new_qfn)) {
 
 # we let the dedicated systemd command tryin to do what we will do later in this script
 # as up to systemd 236 it is bugged see:
-#  https://github.com/systemd/systemd/pull/7158 and https://github.com/systemd/systemd/pull/7289
+#  https://github.com/systemd/systemd/pull/7158 : systemctl: respect [Install] section in drop-ins: should be fixed in SME 12 (239)
+#  https://github.com/systemd/systemd/issues/9477 : aliases; open
+#  https://github.com/systemd/systemd/pull/9901 allow instantiated units to be enabled via presets v240
 system("/usr/bin/systemctl  preset-all");
 # in case preset-all messed up  with our default target
 system("/usr/bin/systemctl  set-default sme-server.target");
@@ -101,10 +103,11 @@ foreach my $filen (reverse sort keys %files) {
 	    my $service=$2;
 	    my $stats=$1;
 #	    print $_ ."\n"; 
-	    #ignore service that does not exists !
+	    # ignore service that does not exists !
+	    # here we are searching for service@instance.service type
 	    my $multiple = $service;
 	    ($multiple = $service ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $service =~ /@/ );
-	    #print "$stats $service $multiple\n";
+	    #print "$stats $service $multiple\n" if $service ne $multiple;
 	    next unless ( -e "/usr/lib/systemd/system/$service" or -e "/etc/systemd/system/$service" or -e "/usr/lib/systemd/system/$multiple");
 	    # eliminate duplicates, this way we keep only the last entry of the lowest file as we do it in reverse order of file,
 	    # but from top to bottom of file.
@@ -117,7 +120,7 @@ foreach my $filen (reverse sort keys %files) {
 		#print "want $service \n";
             }
             else {
-                my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* -rsh` ;
+                my $wanted = `grep -P '^WantedBy=.*sme-server.target' /usr/lib/systemd/system/$service*  /etc/systemd/system/$service* /usr/lib/systemd/system/$multiple* /etc/systemd/system/$multiple* -rsh` ;
                 chomp $wanted;
 		$wantedBy{$service}=1 unless ( $wanted eq "");
 		#print "want $service \n" unless ( $wanted eq "") ;

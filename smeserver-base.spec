@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 20
+%define release 21
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,9 @@ fi
 
 
 %changelog
+* Fri Jan 03 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-21.sme
+- improve support of  systemd service with instance service@instance.service [SME: 12859]
+
 * Thu Jan 02 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-20.sme
 - Primary default to SSL required and redirect [SME: 12858]
 - cleanup remove primary=system [SME: 8268]
