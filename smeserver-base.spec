@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 21
+%define release 22
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -184,6 +184,11 @@ fi
 
 
 %changelog
+* Sat Jan 18 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-22.sme
+- handle all ssl ciphers and protocol in one place esmith::ssl [SME: 12827]
+  this will allow to sync all service default protocol and ciphers
+  in one place.
+
 * Fri Jan 03 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-21.sme
 - improve support of  systemd service with instance service@instance.service [SME: 12859]
 
