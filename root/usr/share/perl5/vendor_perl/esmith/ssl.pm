@@ -200,8 +200,9 @@ SSLv23:!SSLv2:!SSLv3:!TLSv1:!TLSv1_1
 =cut
 
 sub SSLprotoQpsmtpd{
+ my $service= shift || 'qpsmtpd';
  my $configdb = esmith::ConfigDB->open_ro or die "Could not open accounts db";
- my %qpsmtpd = %{$configdb->get('httpd-e-smith')};
+ my %qpsmtpd = %{$configdb->get($service)};
  # SSLv2 and SSLv3 are not available in el8 openssl-1.1.1, while -ssl3 still referenced
  # it will throw  Option unknown option -ssl3
  my $protocols = "SSLv23:!SSLv2:!SSLv3";
