@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 23
+%define release 24
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -49,6 +49,10 @@ Requires: bash-completion
 Requires: smeserver-runit >= 2.6.0-7
 Requires: smeserver-php >= 3.0.0-22
 Requires: smeserver-yum >= 2.6.0-43 
+# daemontools bins in use 
+Requires: /usr/bin/softlimit 
+Requires: /usr/bin/setuidgid
+Requires: /usr/bin/multilog
 Obsoletes: nss_ldap < 254
 Obsoletes: cpu
 Obsoletes: rlinetd, e-smith-mod_ssl
@@ -184,6 +188,9 @@ fi
 
 
 %changelog
+* Sun Jan 26 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-24.sme
+- ippp and wan requires daemontools bins [SME: 12566]
+
 * Sat Jan 18 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-23.sme
 - handle all ssl ciphers and protocol in one place esmith::ssl [SME: 12827]
   this will allow to sync all service default protocol and ciphers
