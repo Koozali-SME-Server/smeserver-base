@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 24
+%define release 25
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -188,6 +188,9 @@ fi
 
 
 %changelog
+* Tue Feb 04 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-25.sme
+- fix boot ordering cycle [SME: 12902]
+
 * Sun Jan 26 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-24.sme
 - ippp and wan requires daemontools bins [SME: 12566]
 
