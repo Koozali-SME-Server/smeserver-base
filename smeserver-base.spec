@@ -196,7 +196,6 @@ fi
 - add pam_abl requirement [SME: 12914]
 - add isdn4k-utils requirement for ippp isdn connections [SME: 12909]
 - remove pam_tally as deprecated in favor of pam_faillock [SME: 12913]
-- fix CGI::param called in list context [SME: 12888]
 
 * Tue Feb 04 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-25.sme
 - fix boot ordering cycle [SME: 12902]
