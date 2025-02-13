@@ -7,7 +7,9 @@ account     sufficient    pam_succeed_if.so uid < 100 quiet
 }
 account     required      pam_permit.so
 {
-    my $status = $pam_tally{status} || 'disabled';
+    my $status = $pam_faillock{status} || 'disabled';
     return unless $status eq 'enabled';
-    $OUT .= "account     required      pam_tally.so deny=5 reset no_magic_root";
+    # if you drop this call to pam_faillock.so the lock will be done also
+    # on non-consecutive authentication failures
+    $OUT .= "account     required      pam_faillock.so";
 }

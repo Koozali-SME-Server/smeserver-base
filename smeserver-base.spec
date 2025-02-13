@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 25
+%define release 26
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -69,7 +69,11 @@ BuildRequires: smeserver-devtools >= 1.13.1-03
 BuildRequires: gettext
 Requires: gdisk
 Requires: ppp
-Requires: rp-pppoe 
+Requires: rp-pppoe
+# pam autoblock 
+Requires: pam_abl 
+# isdn wan connection (ippp)
+Requires: isdn4k-utils
 %define dbfiles accounts configuration domains hosts networks
 AutoReqProv: no
 
@@ -188,6 +192,12 @@ fi
 
 
 %changelog
+* Wed Feb 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-26.sme
+- add pam_abl requirement [SME: 12914]
+- add isdn4k-utils requirement for ippp isdn connections [SME: 12909]
+- remove pam_tally as deprecated in favor of pam_faillock [SME: 12913]
+- fix CGI::param called in list context [SME: 12888]
+
 * Tue Feb 04 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-25.sme
 - fix boot ordering cycle [SME: 12902]
 

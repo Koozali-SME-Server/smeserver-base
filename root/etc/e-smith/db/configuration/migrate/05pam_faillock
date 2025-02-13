@@ -1,0 +1,11 @@
+{
+    my $pamtally = $DB->get("pam_tally") or return;
+
+    my $pamfaillock = $DB->get("pam_faillock") ||
+        $DB->new_record("pam_faillock", { type => "service" });
+
+    $pamfaillock->merge_props($pamtally->props);
+
+    $pamtally->delete;
+}
+
