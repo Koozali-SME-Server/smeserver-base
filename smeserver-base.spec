@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 26
+%define release 27
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -192,6 +192,9 @@ fi
 
 
 %changelog
+* Sun Feb 16 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-27.sme
+- fix missing allowed shell for login [SME: 12926]
+
 * Wed Feb 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-26.sme
 - add pam_abl requirement [SME: 12914]
 - add isdn4k-utils requirement for ippp isdn connections [SME: 12909]
