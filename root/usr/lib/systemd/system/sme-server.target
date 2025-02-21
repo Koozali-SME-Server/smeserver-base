@@ -8,6 +8,6 @@ Requires=basic.target
 Conflicts=rescue.service rescue.target multi-user.target
 After=basic.target rescue.service rescue.target runit.service
 AllowIsolate=yes
-Wants=atd.service auditd.service avahi-daemon.service brandbot.path nfs-client.target remote-fs.target rhel-configure.service
+Wants=atd.service auditd.service avahi-daemon.service nfs-client.target remote-fs.target 
 Wants=dbus.service plymouth-quit-wait.service plymouth-quit.service systemd-logind.service systemd-update-utmp-runlevel.service systemd-user-sessions.service
 

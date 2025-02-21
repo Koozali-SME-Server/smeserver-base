@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 27
+%define release 28
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -192,6 +192,9 @@ fi
 
 
 %changelog
+* Thu Feb 20 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-28.sme
+- clean sme-server.target [SME: 12931]
+
 * Sun Feb 16 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-27.sme
 - fix missing allowed shell for login [SME: 12926]
 
