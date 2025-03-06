@@ -1,0 +1,3 @@
+# wan
+:programname, isequal, "wan"            /var/log/wan/wan.log
+& stop

@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 29
+%define release 30
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -49,10 +49,9 @@ Requires: bash-completion
 Requires: smeserver-runit >= 2.6.0-7
 Requires: smeserver-php >= 3.0.0-22
 Requires: smeserver-yum >= 2.6.0-43 
-# daemontools bins in use 
+# daemontools bins in use : 
+# /var/service/wan/run.pppoe
 Requires: /usr/bin/softlimit 
-Requires: /usr/bin/setuidgid
-Requires: /usr/bin/multilog
 Obsoletes: nss_ldap < 254
 Obsoletes: cpu
 Obsoletes: rlinetd, e-smith-mod_ssl
@@ -122,25 +121,13 @@ mkdir -p $RPM_BUILD_ROOT/etc/selinux
     --dir /home/e-smith/ssl.crt 'attr(0700,root,root)' \
     --dir /home/e-smith/ssl.pem 'attr(0700,root,root)' \
     --dir /var/service/wan 'attr(1755,root,root)' \
-    --file /var/service/wan/down 'attr(0644,root,root)' \
     --file /var/service/wan/run 'attr(0750,root,root)' \
     --file /var/service/wan/run.dhclient 'attr(0750,root,root)' \
     --file /var/service/wan/run.pppoe 'attr(0750,root,root)' \
     --file /var/service/wan/run.static 'attr(0750,root,root)' \
     --file /var/service/wan/run.dialup 'attr(0750,root,root)' \
     --file /var/service/wan/run.disabled 'attr(0750,root,root)' \
-    --dir /var/service/wan/supervise 'attr(0700,root,root)' \
-    --dir /var/service/wan/log 'attr(1755,root,root)' \
-    --file /var/service/wan/log/run 'attr(0750,root,root)' \
-    --dir /var/service/wan/log/supervise 'attr(0700,root,root)' \
     --dir /var/log/wan 'attr(2750,smelog,smelog)' \
-    --dir /var/service/ippp 'attr(1755,root,root)' \
-    --file /var/service/ippp/down 'attr(0644,root,root)' \
-    --file /var/service/ippp/run 'attr(0750,root,root)' \
-    --dir /var/service/ippp/supervise 'attr(0700,root,root)' \
-    --dir /var/service/ippp/log 'attr(1755,root,root)' \
-    --file /var/service/ippp/log/run 'attr(0750,root,root)' \
-    --dir /var/service/ippp/log/supervise 'attr(0700,root,root)' \
     --dir /var/log/ippp 'attr(2750,smelog,smelog)' \
     --dir /etc/e-smith/skel/user/.ssh 'attr(0700,root,root)' \
     --file /etc/sysconfig/modules/dummy.modules 'attr(0755,root,root)' \
@@ -168,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/e-smith/create-system-user smelastsys 2999 \
     'sme last system user marker' /tmp /bin/false
 
+
+exit 0
+
 %post
 LEXICONS=$(find /etc/e-smith/locale/*/etc/e-smith/web/panels/password/cgi-bin/userpassword -type f 2>/dev/null)
 
@@ -192,6 +182,10 @@ fi
 
 
 %changelog
+* Thu Mar 06 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-30.sme
+-  systemd unit for ippp [SME: 12876]
+-  systemd unit for wan [SME: 12875]
+
 * Wed Mar 05 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-29.sme
 - change key type from service to configuration [SME: 11367]
 

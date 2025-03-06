@@ -3,7 +3,8 @@
 ISDN=$(/sbin/e-smith/config getprop isdn status)
 if [ "$ISDN" = "enabled" ]
 then
-    sv u /service/ippp
+    # Stop and then start. If the units are not running yet, they will be started.	
+    /usr/bin/systemctl restart ippp
     sleep 10
     # TODO check here that ISDN device is available!!
 fi

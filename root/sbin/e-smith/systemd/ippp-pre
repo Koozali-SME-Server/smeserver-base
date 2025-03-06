@@ -11,7 +11,7 @@
 # This should run before dialds are started and before any attempt
 # is made to reconfigure ippp interfaces differently.
 
-config_file=./config
+LocalIP=$(/sbin/e-smith/config get LocalIP|| echo "127.0.0.88")
 
 modprobe hisax
 # TODO should check here for failure!!
@@ -55,4 +55,5 @@ ifconfig ippp0 "$LocalIP" \
 # where all the traffic is to/from the local
 # system. i.e. our reply must go out via the
 # diald slip proxy.
-exec ipppd ippp0 -detach -hostroute $pppopts
+# will be done in main process
+exit 0

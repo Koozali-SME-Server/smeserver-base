@@ -1,0 +1,21 @@
+[Unit]
+Description=Koozali SME Server ippp service for dialup
+After=network-pre.target
+After=networking.service
+Requires=network.target
+
+[Service]
+Type=simple
+#this needs to be updated  in a dropin file
+Environment=pppopts="user sme name sme noauth debug -vj -vjccomp -bsdcomp -ac -pc noipdefault ipcp-accept-local ipcp-accept-remote ipparam diald"
+ExecStartPre=-/sbin/e-smith/service-status ippp
+ExecStartPre=/sbin/e-smith/systemd/ippp-pre
+ExecStart=/usr/sbin/ipppd ippp0 -detach -hostroute $pppopts
+
+Restart=always
+RestartSec=20s
+SyslogIdentifier=ippp
+
+[Install]
+WantedBy=sme-server.target
+

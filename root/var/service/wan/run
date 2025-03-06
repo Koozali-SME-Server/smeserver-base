@@ -9,4 +9,5 @@ then
 fi
 
 echo script run.$config not found - please report this as a bug
-sleep 100
+#sleep 100
+exit 0

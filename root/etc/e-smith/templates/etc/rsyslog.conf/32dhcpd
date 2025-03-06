@@ -1,4 +1,3 @@
-
 # dhcpd
 :programname, isequal, "dhcpd"            /var/log/dhcpd/dhcpd.log
 & stop

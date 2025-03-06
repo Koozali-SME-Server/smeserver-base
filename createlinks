@@ -45,7 +45,7 @@ foreach (qw(
     /etc/diald.conf
     /etc/diald.filter
     /etc/diald/link
-    /var/service/ippp/config
+    /usr/lib/systemd/system/ippp.service.d/50koozali.conf
     /etc/ppp/ioptions
     ))
 {

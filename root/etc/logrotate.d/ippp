@@ -1,0 +1,9 @@
+/var/log/ippp/ippp.log {
+    weekly
+    rotate 5
+    copytruncate
+    compress
+    notifempty
+    missingok
+}
+

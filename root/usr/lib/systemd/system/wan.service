@@ -1,16 +1,24 @@
 [Unit]
 Description=WAN interface for Koozali SME Server
-After=network-pre.target networking.service
+After=network-pre.target
+After=networking.service
 Before=network-online.target
 PartOf=networking.service
 
 [Service]
-Type=oneshot
+PermissionsStartOnly=true
+WorkingDirectory=/var/service/wan
+Type=simple
 ExecStartPre=/sbin/e-smith/service-status wan
-ExecStart=/usr/bin/sv u /service/wan
-ExecStop=/usr/bin/sv stop  /service/wan
-ExecReload=/usr/bin/sv t /service/wan
+ExecStart=/var/service/wan/run
+ExecReload=/var/service/wan/run
+
+#run.static will just exit, this might create an infinite loop
+#unless set on-failure on-abnormal on-abort on-watchdog
+Restart=on-failure
+RestartSec=20s
 RemainAfterExit=yes
+SyslogIdentifier=wan
 
 [Install]
 WantedBy=sme-server.target

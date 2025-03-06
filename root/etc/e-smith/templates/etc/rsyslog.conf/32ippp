@@ -1,0 +1,3 @@
+# ippp
+:programname, isequal, "ippp"            /var/log/ippp/ippp.log
+& stop
