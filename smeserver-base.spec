@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 28
+%define release 29
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -192,6 +192,9 @@ fi
 
 
 %changelog
+* Wed Mar 05 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-29.sme
+- change key type from service to configuration [SME: 11367]
+
 * Thu Feb 20 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-28.sme
 - clean sme-server.target [SME: 12931]
 
