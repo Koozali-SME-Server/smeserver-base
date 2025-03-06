@@ -183,8 +183,9 @@ fi
 
 %changelog
 * Thu Mar 06 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-30.sme
--  systemd unit for ippp [SME: 12876]
--  systemd unit for wan [SME: 12875]
+- systemd unit for ippp [SME: 12876]
+- systemd unit for wan [SME: 12875]
+- improve networking service unit [SME: 12541]
 
 * Wed Mar 05 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-29.sme
 - change key type from service to configuration [SME: 11367]

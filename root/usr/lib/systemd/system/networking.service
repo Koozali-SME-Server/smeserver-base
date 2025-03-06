@@ -1,8 +1,11 @@
 [Unit]
 Description= Network management for Koozali SME Server, using old sysvinit script
 After=network-pre.target
+Wants=network-online.target
 Wants=network.target
-Before=network-online.target wan.service
+Before=network-online.target 
+Before=network.target
+Before=wan.service
 Conflicts=NetworkManager.service
 
 [Service]
