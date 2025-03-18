@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 30
+%define release 31
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,11 @@ fi
 
 
 %changelog
+* Sun Mar 16 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-31.sme
+- handle dh params with template [SME: 12826]
+ TODO timer and event
+- foolproofing dummy.module
+
 * Thu Mar 06 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-30.sme
 - systemd unit for ippp [SME: 12876]
 - systemd unit for wan [SME: 12875]

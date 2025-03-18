@@ -15,12 +15,6 @@ enable networking.service
 enable wan.service
 enable masq.service
 enable php-fpm.service
-enable php55-php-fpm.service
-enable php56-php-fpm.service
-enable php70-php-fpm.service
-enable php71-php-fpm.service
-enable php72-php-fpm.service
-enable php73-php-fpm.service
 enable php74-php-fpm.service
 enable php80-php-fpm.service
 enable httpd-e-smith.service
@@ -73,3 +67,4 @@ disable ntpdate.service
 disable ftp.service
 disable proftpd.service
 
+enable dhparam-generator.service

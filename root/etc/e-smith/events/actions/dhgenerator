@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use esmith::ssl;
+
+my $event=shift||"program";
+my $folder="/home/e-smith/dh.pem";
+my $KeySize = 2048;
+# load config db
+
+mkdir($folder, 0700) unless(-d $folder );
+# if program (or during updates) we only generate the 2048 to start all programs after install without waiting too much
+if ( $event eq "program" || $event eq "temp" ) {
+	my $exit_code=dh_exists_good_size($KeySize,"$folder/$KeySize.pem") || system("/usr/bin/openssl","dhparam","-out","$folder/$KeySize.pem", $KeySize);
+  exit 0;
+}
+# if called as event, we generate a 4096 if 2096 exist, and then expand templates for services in need of this 
+#  then the event will restart the service to use stronger dh.pem
+else {
+ $KeySize =  4096 if (dh_exists_good_size($KeySize,"$folder/$KeySize.pem"));
+ print "Key size is  $KeySize\n";
+ exit 0 if (dh_exists_good_size($KeySize,"$folder/$KeySize.pem"));
+ # here we should test if uptime  > 2 hours and return if not enough uptime
+ system("/usr/bin/openssl","dhparam","-out","$folder/$KeySize.pem", $KeySize);
+ exit 0; 
+}
+

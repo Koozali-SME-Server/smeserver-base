@@ -1,0 +1,8 @@
+{
+use esmith::ssl;
+my $folder="/home/e-smith/dh.pem";
+my $KeySize = 4096;
+$OUT = "#4096 dhparam exists";
+$OUT = '@reboot root sleep 2d && /sbin/e-smith/signal-event dhparam-update'."\n" unless (dh_exists_good_size($KeySize,"$folder/$KeySize.pem"));
+}
+

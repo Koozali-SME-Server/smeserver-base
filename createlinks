@@ -303,10 +303,11 @@ my $event = "smeserver-base-update";
 
 
 event_link("remove-templates-custom", $event, "02");
+event_link("systemd-journald", $event, "02");
+event_link("dhgenerator", $event, "03");
 templates2events("/etc/smartmontools/smartd.conf", $event);
 templates2events("/home/e-smith/ssl.pem/pem", $event);
 templates2events("/usr/lib/systemd/system/dhcpd.service.d/50koozali.conf", $event);
-event_link("systemd-journald", $event, "02");
 event_link("fix-startup", $event, "05");
 event_link("init-accounts", $event, "05");
 event_link("mail-spool-fix", $event, "05");
@@ -612,13 +613,24 @@ $event = "ldap-update";
 templates2events("/home/e-smith/ssl.pem/pem", $event);
 
 #--------------------------------------------------
-# actions for ldap-update event
+# actions for ssl-update event
 #--------------------------------------------------
 
 $event = "ssl-update";
 
 templates2events("/home/e-smith/ssl.pem/pem", $event);
 
+#--------------------------------------------------
+# actions for dhparam-update event
+#--------------------------------------------------
+
+$event = "dhparam-update";
+
+event_link("dhgenerator", $event, "03");
+templates2events("/etc/crontab", $event);
+# add templates to expand  + service to try-restart in target packages
+# templates2events("/etc/dovecot/ssl/dhparam.pem", $event);
+# safe_symlink("try-restart", "root/etc/e-smith/events/$event/services2adjust/dovecot"); 
 
 #--------------------------------------------------
 # actions for email-update event:

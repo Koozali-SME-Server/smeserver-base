@@ -1,3 +1,4 @@
 #!/bin/sh
 /sbin/modprobe dummy
+$(ip link show dummy0 2>/dev/null 1>&2)  || exec ip link add dummy0 type dummy
 exec ip link set dummy0 address 10:00:01:02:03:04

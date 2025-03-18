@@ -6,7 +6,7 @@ use esmith::ConfigDB;
 
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw( key_exists_good_size cert_exists_good_size cert_is_cert key_is_key related_key_cert SSLproto SSLprotoApache SSLprotoComa SSLprotoHyphen SSLprotoMin SSLprotoLDAP SSLprotoQpsmtpd $smeCiphers $smeSSLprotocol %existingSSLprotos);
+our @EXPORT = qw( key_exists_good_size cert_exists_good_size cert_is_cert key_is_key related_key_cert SSLproto SSLprotoApache SSLprotoComa SSLprotoHyphen SSLprotoMin SSLprotoLDAP SSLprotoQpsmtpd $smeCiphers $smeSSLprotocol %existingSSLprotos dh_exists_good_size);
 
 my $configdb = esmith::ConfigDB->open_ro or die "Could not open accounts db";
 our $SystemName = $configdb->get('SystemName')->value;
@@ -161,6 +161,38 @@ sub related_key_cert {
     }
     return 0;
 }
+
+=head2 dh_exists_good_size
+# check dh exist
+# check dh is indeed dh
+# check dh size 
+# openssl rsa -noout -modulus -in domain.key | openssl md5
+# openssl x509 -noout -modulus -in domain.crt | openssl md5
+=cut
+
+sub dh_exists_good_size {
+    my $configdb = esmith::ConfigDB->open_ro or die "Could not open accounts db";
+    my %modSSL = $configdb->as_hash('modSSL');
+    my $KeySize = shift || $modSSL{DHSize} ||'4096';
+		my $dh = shift || "/home/e-smith/dh.pem/$KeySize.pem";
+    if ( -f $dh )
+    {
+  my $signatureKeySize = `openssl dhparam -text -noout -in $dh 2>/dev/null | grep "DH Parameters:" | head -1`;
+  chomp $signatureKeySize;
+  $signatureKeySize =~ s/^.*DH Parameters: \((.*) bit\)/$1/p;
+  if ( $signatureKeySize == $KeySize ) {
+    #print "$signatureKeySize\n";
+    # cert is  correct size and exists, we can proceed.
+    # next check key and cert are related
+    # next check cert is still valid
+    # next check alt name are still the same
+    return 1;
+  }
+    }
+    return 0;
+}
+
+
 
 ##TODO write sub and migrate those actions from template fragments
 # check cert is related to key

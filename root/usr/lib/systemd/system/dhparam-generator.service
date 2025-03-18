@@ -1,0 +1,24 @@
+[Unit]
+Description=Diffie Hellman parameter generator
+#TODO: add Requires= or Wants= to those:
+Before=ftp.service
+Before=dovecot.service
+Before=qpsmtpd.service sqpsmtpd.service uqpsmtpd.service
+Before=radiusd.service
+
+[Service]
+Type=oneshot
+ExecStart=/etc/e-smith/events/actions/dhgenerator
+# sqpsmtpd and uqpsmtpd use a symlink to /var/service/qpsmtpd/ssl
+ExecStartPost=-/sbin/e-smith/expand-template /var/service/qpsmtpd/ssl/dhparam.pem
+ExecStartPost=-/sbin/e-smith/expand-template /etc/dovecot/ssl/dhparam.pem
+ExecStartPost=-/sbin/e-smith/expand-template /etc/raddb/certs/dh 
+
+PrivateTmp=true
+ProtectSystem=no
+ProtectHome=no
+PrivateDevices=false
+
+[Install]
+WantedBy=sme-server.target
+
