@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 31
+%define release 32
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,9 @@ fi
 
 
 %changelog
+* Thu Jun 05 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-32.sme
+- Replicate user accounts to samba Active Directory [SME: 12799]
+
 * Sun Mar 16 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-31.sme
 - handle dh params with template [SME: 12826]
  TODO timer and event

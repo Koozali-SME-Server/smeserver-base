@@ -78,6 +78,23 @@ sub lock_user
     {
         $conf->set_value('PasswordSet', 'no');
     }
+
+    my $serv = $conf->get('samba') || '';
+    if (($serv eq 'service') && ($userName ne 'administrator'))
+    {
+    my $samba = $conf->get('samba')->prop('status') || 'disabled';
+    my $sambaip = $conf->get('samba')->prop('SambaIP') || '';
+    my $sambapwd = $conf->get('samba')->prop('Password') || '';
+    if ($sambaip eq '' || $sambapwd eq '')
+    {
+        $samba = 'disabled';
+    }
+    if ($samba eq 'enabled')
+    {
+    system("/usr/bin/samba-tool", "user", "disable", "$userName", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd") == 0
+        or ( $x = 255, warn "Error locking (addc) account $userName" );
+    }
+    }
 }
 
 sub bad_password_users

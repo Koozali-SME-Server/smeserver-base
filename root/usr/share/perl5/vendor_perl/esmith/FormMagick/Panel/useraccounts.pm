@@ -911,6 +911,29 @@ sub reset_password {
 
         $self->success($self->localise('PASSWORD_CHANGE_SUCCEEDED',
             { acctName => $acctName}));
+
+	my $serv = $configdb->get('samba') || '';
+	if (($serv eq 'service') && ($acctName ne 'administrator'))
+	{
+	my $samba = $configdb->get('samba')->prop('status') || 'disabled';
+	my $sambaip = $configdb->get('samba')->prop('SambaIP') || '';
+	my $sambapwd = $configdb->get('samba')->prop('Password') || '';
+	if ($sambaip eq '' || $sambapwd eq '')
+	{
+	    $samba = 'disabled';
+	}
+	if ($samba eq 'enabled')
+	{
+	my $password = $self->{cgi}->param('password1');
+	unless (($password) = ($password =~ /^([ -~]+)$/ ))
+	{
+	    return $self->error('TAINTED_PASSWORD');
+	}
+	$password = $1;
+	system("/usr/bin/samba-tool", "user", "setpassword", "$acctName", "--newpassword=$password", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")  == 0
+	    or warn ("Error occured while modifying (addc) password for $acctName.\n" );
+	}
+	}
     }
     else
     {

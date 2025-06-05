@@ -28,6 +28,7 @@ use Errno;
 use esmith::AccountsDB;
 
 my $a = esmith::AccountsDB->open_ro or die "Could not open accounts db";
+my $c = esmith::ConfigDB->open_ro or die "Could not open configuration db";
 
 foreach my $u ($a->users)
 {
@@ -40,6 +41,23 @@ foreach my $u ($a->users)
 
 	system("/usr/bin/smbpasswd", "-d", $user) == 0
 	    or warn("Problem locking smbpassword for user $user\n");
+
+	my $serv = $c->get('samba') || '';
+	if (($serv eq 'service') && ($user ne 'administrator'))
+	{
+	my $samba = $c->get('samba')->prop('status') || 'disabled';
+	my $sambaip = $c->get('samba')->prop('SambaIP') || '';
+	my $sambapwd = $c->get('samba')->prop('Password') || '';
+	if ($sambaip eq '' || $sambapwd eq '')
+        {
+	    $samba = 'disabled';
+        }
+	if ($samba eq 'enabled')
+	{
+	system("/usr/bin/samba-tool", "user", "disable", "$user", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd") == 0
+	    or warn("Problem locking addc password for user $user\n");
+	}
+	}
     }
 }
 

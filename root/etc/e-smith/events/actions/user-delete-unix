@@ -75,4 +75,21 @@ $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete (lda
 $result = $ldap->ldapdelgroup($userName);
 $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to delete (ldap) group account $userName.\n" );
 
+my $serv = $conf->get('samba') || '';
+if (($serv eq 'service') && ($userName ne 'administrator'))
+{
+my $samba = $conf->get('samba')->prop('status') || 'disabled';
+my $sambaip = $conf->get('samba')->prop('SambaIP') || '';
+my $sambapwd = $conf->get('samba')->prop('Password') || '';
+if ($sambaip eq '' || $sambapwd eq '')
+    {
+        $samba = 'disabled';
+    }
+if ($samba eq 'enabled')
+{
+system("/usr/bin/samba-tool", "user", "delete", "$userName", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")
+    and ( $x = 255, warn "Failed to delete (addc) account $userName.\n" );
+}
+}
+
 exit ($x);

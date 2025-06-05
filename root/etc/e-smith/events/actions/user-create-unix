@@ -134,4 +134,23 @@ if ($ldapauth ne 'enabled')
 system("/usr/bin/smbpasswd", "-a", "-d", "$userName")
     and ( $x = 255, warn "Could not lock (smb) password for $userName\n" );
 
+my $serv = $conf->get('samba') || '';
+if (($serv eq 'service') && ($userName ne 'administrator'))
+{
+my $samba = $conf->get('samba')->prop('status') || 'disabled';
+my $sambaip = $conf->get('samba')->prop('SambaIP') || '';
+my $sambapwd = $conf->get('samba')->prop('Password') || '';
+if ($sambaip eq '' || $sambapwd eq '')
+    {
+        $samba = 'disabled';
+    }
+if ($samba eq 'enabled')
+{
+system("/usr/bin/samba-tool", "user", "add", "$userName", "--random-password", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")
+    and ( $x = 255, warn "Could not create (addc) user for $userName\n" );
+system("/usr/bin/samba-tool", "user", "disable", "$userName", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")
+    and ( $x = 255, warn "Could not lock (addc) password for $userName\n" );
+}
+}
+
 exit ($x);
