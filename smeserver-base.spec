@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 32
+%define release 33
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,10 @@ fi
 
 
 %changelog
+* Thu Jun 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-33.sme
+- fix autorenew of self-signed certificate [SME: 12218]
+  strips unsupported characters, use utf8 encoding
+
 * Thu Jun 05 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-32.sme
 - Replicate user accounts to samba Active Directory [SME: 12799]
 

@@ -2,6 +2,7 @@
     use constant KEYLIFEINDAYS => $modSSL{KeyLifeInDays} || 365;
     use esmith::ssl;
     use Date::Parse;
+    use utf8;
     use Cwd;
     use Net::IP qw(ip_is_ipv4 ip_is_ipv6);
     use esmith::Logger;
@@ -37,66 +38,70 @@
     $Country = substr($Country, 0, 2);
     $defaultCity = substr($defaultCity, 0, 128); 
     $defaultCompany = substr($defaultCompany, 0, 64); 
-    $defaultDepartment = substr($defaultDepartment, 0, 64); 
+    $defaultDepartment = substr($defaultDepartment, 0, 64);
+    $defaultDepartment =~ s/[''"]//g;
     $email = substr($email, 0, 64);
     $commonName = substr($commonName, 0, 64);
 
     # if self-signed certificate files exists, is a certificate, and is still valid
     if ( cert_exists_good_size )
     {
-	# check expiry date, if less than 2 days from now we update it.
+        # check expiry date, if less than 2 days from now we update it.
         my $expire = `openssl x509 -enddate -noout -in $crt`;
         $expire =~ s/^notAfter=//;
         $expire = str2time($expire);
         my $ttl_days = ($expire - time()) / 60 / 60 / 24;
-	# check the cert and the key are related, if key has been changed, then we need to change the cert
-	my $crt_md5 = `openssl x509 -noout -modulus -in $crt | openssl md5`;
-	my $key_md5 = `openssl rsa -noout -modulus -in $key | openssl md5`;
+        # check the cert and the key are related, if key has been changed, then we need to change the cert
+        my $crt_md5 = `openssl x509 -noout -modulus -in $crt | openssl md5`;
+        my $key_md5 = `openssl rsa -noout -modulus -in $key | openssl md5`;
 
         if ( ($ttl_days > 2) && ( "$crt_md5" eq "$key_md5" ) ) {
-            my $expected_issuer = 'C = '.$Country .
-                              ', ST = '.$State;
-            $expected_issuer .= ', L = ' . ($defaultCity ? $defaultCity : 'Default City');
-            $expected_issuer .= ', O = ' . ($defaultCompany ? $defaultCompany : 'Default Company Ltd');
-            $expected_issuer .= ", OU = $defaultDepartment" if $defaultDepartment;
-            $expected_issuer .= ", CN = $commonName" .
-                                  ", emailAddress = $email";
-            my $issuer = `openssl x509 -issuer -noout -in $crt`;
+            my $expected_issuer = 'C='.$Country .
+                              ', ST='.$State;
+            $expected_issuer .= ', L=' . ($defaultCity ? $defaultCity : 'Default City');
+            $expected_issuer .= ', O=' . ($defaultCompany ? $defaultCompany : 'Default Company Ltd');
+            $expected_issuer .= ", OU=$defaultDepartment" if $defaultDepartment;
+            $expected_issuer .= ", CN=$commonName" .
+                                  ", emailAddress=$email";
+            # format so we can compare with right encoding
+            my $issuer = `openssl x509 -issuer -nameopt dump_der -noout -in $crt`;
             chomp $issuer;
             $issuer =~ s/^issuer=//;
+            # we remove any "
+            $issuer =~ s/["]//g;
             my $signatureAlg = `openssl x509 -text -noout -in $crt | grep "Signature Algorithm" | head -1`;
             chomp $signatureAlg;
             $signatureAlg =~ s/^ *Signature Algorithm: //;
-	    
-	    # Test for expected subjectAltName
+            
+            # Test for expected subjectAltName
             # openssl x509 -text -noout -in /etc/dehydrated/certs/domain/cert.pem | sed -ne '/X509v3 Subject Alternative Name/{ N;s/^.*\n//;:a;s/^\( *\)\(.*\), /\2,\1/;ta;p;q; }'
-	    $expected_subjectAltName = `openssl x509 -text -noout -in $crt | sed -ne '/X509v3 Subject Alternative Name/{ N;s/^.*\\n//;:a;s/^\\( *\\)\\(.*\\), /\\2,\\1/;ta;p;q; }'`;
-	    chomp $expected_subjectAltName;
+            $expected_subjectAltName = `openssl x509 -text -noout -in $crt | sed -ne '/X509v3 Subject Alternative Name/{ N;s/^.*\\n//;:a;s/^\\( *\\)\\(.*\\), /\\2,\\1/;ta;p;q; }'`;
+            chomp $expected_subjectAltName;
             print FH "Self-Signed Cert: $issuer\n expected $expected_issuer" unless ($issuer eq $expected_issuer);
             print FH "Self-Signed Cert: $signatureAlg "unless ($signatureAlg ne "sha1WithRSAEncryption");
             print FH "Self-Signed Cert: $subjectAltName\n expected: $expected_subjectAltName" unless ($subjectAltName eq $expected_subjectAltName);
             if (
-	                 ($issuer eq $expected_issuer)
-	              && ($signatureAlg ne "sha1WithRSAEncryption")
-		      && ($subjectAltName eq $expected_subjectAltName)
+                         ($issuer eq $expected_issuer)
+                      && ($signatureAlg ne "sha1WithRSAEncryption")
+                      && ($subjectAltName eq $expected_subjectAltName)
             )
-	    {
-	        # Old key file is still good. Read it out - processTemplate will work
-	        # out that it hasn't changed, and leave the old one in place
-	        open(C, "$crt") or die "Couldn't open crt file: $!";
-	        my @crt = <C>;
-	        chomp @crt;
-	        $OUT = join "\n", @crt;
-	        close(C);
-	        return;
-	    }
-	}
+            {
+                # Old key file is still good. Read it out - processTemplate will work
+                # out that it hasn't changed, and leave the old one in place
+                open(C, "$crt") or die "Couldn't open crt file: $!";
+                my @crt = <C>;
+                chomp @crt;
+                $OUT = join "\n", @crt;
+                close(C);
+                return;
+            }
+        }
     }
     # go to somewhere private and safe where we can run programs
     # as root
     unless (-e "/tmp/ssl")
     {
-	mkdir "/tmp/ssl", 0700;
+        mkdir "/tmp/ssl", 0700;
     }
     chdir "/tmp/ssl" or die "Couldn't change to secure directory: $!";
 
@@ -104,21 +109,21 @@
 
     unless (open(SSL,"-|"))
     {
-	    # child
-	    exec("/usr/bin/openssl",
-		qw(req -new -key),
-		$key,
-		qw( -sha256 -x509 -days), KEYLIFEINDAYS,
-		qw(-set_serial), time(),
-		qw(-extensions v3_req),
-		qw(-config), "/etc/openssl.conf" 
-		)
-		    || die "can't exec program: $!";
-	    # NOTREACHED
+            # child
+            exec("/usr/bin/openssl",
+                qw(req -new -key),
+                $key,
+                qw( -sha256 -x509 -days), KEYLIFEINDAYS,
+                qw(-set_serial), time(),
+                qw(-extensions v3_req),
+                qw(-config), "/etc/openssl.conf"
+                )
+                    || die "can't exec program: $!";
+            # NOTREACHED
     }
     while (<SSL>)
     {
-	$OUT .= $_;
+        $OUT .= $_;
     }
     close(SSL) or die "Closing openssl pipe reported: $!";
     chdir $here;
