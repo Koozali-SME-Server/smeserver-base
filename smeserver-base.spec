@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 33
+%define release 34
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,9 @@ fi
 
 
 %changelog
+* Wed Jul 09 2025 John Crisp <jcrisp@safeandsoundit.co.uk> 11.0.0-34.sme
+- fix hardcoded rp-pppoe.so location - Thanks Nestor [SME: 13074]
+
 * Thu Jun 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-33.sme
 - fix autorenew of self-signed certificate [SME: 12218]
   strips unsupported characters, use utf8 encoding

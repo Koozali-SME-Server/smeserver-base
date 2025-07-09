@@ -1,1 +1,6 @@
-LINUX_PLUGIN=/usr/lib64/pppd/2.4.5/rp-pppoe.so
+{
+# Find Roaring Penguin pppoe plugin
+my ($plugin) = glob "/usr/lib*/pppd/*/rp-pppoe.so";
+$plugin ||= "pppoe_plugin_could_not_be_found";
+$OUT .= "LINUX_PLUGIN=$plugin\n";
+}
