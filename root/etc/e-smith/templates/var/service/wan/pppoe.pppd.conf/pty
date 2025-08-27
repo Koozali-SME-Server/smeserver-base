@@ -1,5 +1,5 @@
 {
-    my $inkernel = $pppoe{InKernel} || "no";
+    my $inkernel = "yes"; #$pppoe{InKernel} || "yes"; # we force inkernel for performance
     my $timeout = $pppoe{Timeout} || 120; # PPPOE_TIMEOUT should be about 4*LCP_INTERVAL
     my $device = $pppoe{PhysicalInterface} || "eth1";
     my $syncPPP = $pppoe{SynchronousPPP} || "no";
@@ -13,12 +13,7 @@
     }
     if ($inkernel eq "yes")
     {
-	# Find Roaring Penguin pppoe plugin
-	my ($plugin) = glob "/usr/lib*/pppd/*/rp-pppoe.so";
-	$plugin ||= "pppoe_plugin_could_not_be_found";
-
-	$OUT .= "plugin $plugin\n";
-	$OUT .= "$device";
+	#$OUT .= "$device";
     }
     else
     {

@@ -1,1 +1,8 @@
-mru 1492
+{
+  $OUT = "";
+  my $inkernel = "yes"; #$pppoe{InKernel} || "yes"; # we force inkernel for performance
+  if ($inkernel eq "yes")
+  { 
+    $OUT = "mru 1492";
+  }
+}

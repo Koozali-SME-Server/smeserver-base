@@ -1,6 +1,11 @@
 {
-# Find Roaring Penguin pppoe plugin
-my ($plugin) = glob "/usr/lib*/pppd/*/rp-pppoe.so";
-$plugin ||= "pppoe_plugin_could_not_be_found";
-$OUT .= "plugin $plugin\n";
+  $OUT = "";
+  my $inkernel = "yes"; #$pppoe{InKernel} || "yes"; # we force inkernel for performance
+  if ($inkernel eq "yes")
+  {
+    # Find Roaring Penguin pppoe plugin
+    my ($plugin) = glob "/usr/lib*/pppd/*/rp-pppoe.so";
+    $plugin ||= "pppoe_plugin_could_not_be_found";
+    $OUT .= "plugin $plugin\n";
+  }
 }

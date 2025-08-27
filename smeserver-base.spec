@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 34
+%define release 35
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,10 @@ fi
 
 
 %changelog
+* Wed Aug 27 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-35.sme
+- improve pppoe plugin patch [SME: 13074]
+- handle both EC and RSA key/cert with esmith::ssl [SME: 11772]
+
 * Wed Jul 09 2025 John Crisp <jcrisp@safeandsoundit.co.uk> 11.0.0-34.sme
 - fix hardcoded rp-pppoe.so location - Thanks Nestor [SME: 13074]
 

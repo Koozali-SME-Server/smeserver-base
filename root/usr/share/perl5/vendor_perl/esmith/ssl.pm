@@ -6,7 +6,7 @@ use esmith::ConfigDB;
 
 
 our @ISA = qw(Exporter);
-our @EXPORT = qw( key_exists_good_size cert_exists_good_size cert_is_cert key_is_key related_key_cert SSLproto SSLprotoApache SSLprotoComa SSLprotoHyphen SSLprotoMin SSLprotoLDAP SSLprotoQpsmtpd $smeCiphers $smeSSLprotocol %existingSSLprotos dh_exists_good_size);
+our @EXPORT = qw( key_exists_good_size cert_exists_good_size cert_is_cert key_is_key key_is_ec related_key_cert SSLproto SSLprotoApache SSLprotoComa SSLprotoHyphen SSLprotoMin SSLprotoLDAP SSLprotoQpsmtpd $smeCiphers $smeSSLprotocol %existingSSLprotos dh_exists_good_size);
 
 my $configdb = esmith::ConfigDB->open_ro or die "Could not open accounts db";
 our $SystemName = $configdb->get('SystemName')->value;
@@ -47,7 +47,9 @@ planned to be called in  :
 /etc/e-smith/templates/home/e-smith/ssl.key
 
 returns 0 if key is missing or wrong size
-returns 1 if key exists and key size is correct
+returns 1 if key exists and RSA key size is 4096
+
+if elliptic curve key , size is assumed correct if >= 256.
 
 =cut
 
@@ -55,14 +57,19 @@ sub key_exists_good_size {
     my $configdb = esmith::ConfigDB->open_ro or die "Could not open accounts db";
     my %modSSL = $configdb->as_hash('modSSL');
     my $KeySize = $modSSL{KeySize} ||'4096';
+    my $ECSize = $modSSL{ECKeySize} ||'256';
     my $key = shift || "/home/e-smith/ssl.key/$FQDN.key";
     if ( -f $key ) 
     {
     	#print "$key exists\n";
         # check key size openssl rsa -in /home/e-smith/ssl.key/$host.$domain.key -text -noout | sed -rn "s/Private-Key: \((.*) bit\)/\1/p"
-        my $signatureKeySize = `openssl rsa -in  $key -text -noout | grep "Private-Key" | head -1`;
+        my $signatureKeySize = `openssl pkey -in  $key -text -noout | grep "Private-Key" | head -1`;
         chomp $signatureKeySize;
         $signatureKeySize =~ s/^.*Private-Key: \((.*) bit.*\)/$1/p;
+	my $algo = (key_is_ec($key)) ? 'ec' :'rsa';
+	# TODO : make EC key size configurable OR filter weak algo
+	# 2025/08 secp224r1 is the only lower than 256
+	return 1 if ($algo eq "ec" && $signatureKeySize >= $ECSize);
         if ( $signatureKeySize == $KeySize ) {
 		#print "key size is correct ($KeySize)\n";
 		# key exists and key size is correct, we can proceed
@@ -138,7 +145,7 @@ sub key_is_key {
     {
 	open my $oldout, ">&STDERR";  # "dup" the stdout filehandle
 	close STDERR;
-        my $exit_code=system("openssl","rsa", "-noout", "-in", "$key");
+        my $exit_code=system("openssl","pkey", "-noout", "-in", "$key");
 	open STDERR, '>&', $oldout;  # restore the dup'ed filehandle to STDOUT
         if ($exit_code==0){
                 #print "key is a key\n";
@@ -148,14 +155,36 @@ sub key_is_key {
     return 0;
 }
 
+=head2 key_is_ec
+check if key is elliptic or RSA based.
+=cut
+sub key_is_ec {
+    my $key = shift || "/home/e-smith/ssl.key/$FQDN.key";
+    if ( -f $key )
+    {
+        open my $oldout, ">&STDERR";  # "dup" the stdout filehandle
+        close STDERR;
+ 	my $exit_code=system("openssl","ec", "-noout", "-in", "$key");
+        if ($exit_code==0){
+                return 1;
+        }
+    }
+    return 0;
+}
+
+=head2 related_key_cert
+are $key and $crt provided as first and second argument related to each other.
+if not argument provided we will check to default location.
+=cut
 sub related_key_cert {
     my $key = shift || "/home/e-smith/ssl.key/$FQDN.key";
     my $crt = shift || "/home/e-smith/ssl.crt/$FQDN.crt";
     if ( key_is_key($key) and cert_is_cert($crt) )
     { 
 	# check the cert and the key are related, if key has been changed, then we need to change the cert
-	my $crt_md5 = `openssl x509 -noout -modulus -in $crt | openssl md5`;
-	my $key_md5 = `openssl rsa -noout -modulus -in $key | openssl md5`;
+	# works both for RSA and elliptic curve
+	my $crt_md5 = `openssl x509 -pubkey -noout -in $crt | openssl md5`;
+	my $key_md5 = `openssl pkey -pubout -in $key | openssl md5`;
 	#print "$key_md5 eq $crt_md5\n";
 	return 1 if $key_md5 eq $crt_md5;
     }
