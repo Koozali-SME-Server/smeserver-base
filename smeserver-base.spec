@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 35
+%define release 36
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,9 @@ fi
 
 
 %changelog
+* Sat Sep 06 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-36.sme
+- fix pppoe not connecting missing interface [SME: 13130]
+
 * Wed Aug 27 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-35.sme
 - improve pppoe plugin patch [SME: 13074]
 - handle both EC and RSA key/cert with esmith::ssl [SME: 11772]

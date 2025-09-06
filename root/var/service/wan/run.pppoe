@@ -1,6 +1,7 @@
 #!/bin/sh
 #----------------------------------------------------------------------
 # copyright (C) 2002 Mitel Networks Corporation
+# copyright (C) 2025 Koozali Foundation inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ exec 2>&1
 . ./run.pppoe.conf
 
 extaddr=$(/sbin/e-smith/config getprop ExternalInterface IPAddress)
+interface=$(/sbin/e-smith/config getprop pppoe PhysicalInterface)
 
 exec \
     /usr/local/bin/softlimit -m $PPPD_MLIMIT \
