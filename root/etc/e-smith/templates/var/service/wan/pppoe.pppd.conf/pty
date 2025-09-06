@@ -11,11 +11,7 @@
 	$OUT .= "sync\n";
 	$syncflag = "-s";
     }
-    if ($inkernel eq "yes")
-    {
-	#$OUT .= "$device";
-    }
-    else
+    if ($inkernel eq "no")
     {
 	$OUT .= "pty '/usr/sbin/pppoe -I $device -T $timeout -U -m 1412 $syncflag'";
     }
