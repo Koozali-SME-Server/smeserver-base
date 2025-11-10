@@ -1,5 +1,5 @@
 {
- foreach my $sservice (qw(serial-console pppoe modSSL pam_abl pam_faillock)) {
+ foreach my $sservice (qw(serial-console pppoe modSSL pam_abl pam_faillock ippp)) {
   $DB->set_prop($sservice, "type", "configuration") if  ${$sservice}{type} eq "service";
   }
 }

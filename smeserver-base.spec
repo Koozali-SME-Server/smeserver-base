@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 36
+%define release 37
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -182,6 +182,9 @@ fi
 
 
 %changelog
+* Mon Nov 10 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-37.sme
+- change key type from ippp service to configuration [SME: 11367] 
+
 * Sat Sep 06 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-36.sme
 - fix pppoe not connecting missing interface [SME: 13130]
 
