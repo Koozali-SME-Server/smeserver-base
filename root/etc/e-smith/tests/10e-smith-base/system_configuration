@@ -13,7 +13,5 @@ imaps=service|access|private|status|disabled
 oidentd=service|access|private|status|disabled
 pop3s=service|access|private|status|disabled
 popd=service|access|private|status|disabled
-smtpfront-qmail=service|access|private|status|disabled
-ssmtpfront-qmail=service|access|private|status|disabled
 sshd=service|access|private|status|disabled
 telnet=service|access|private|status|disabled

@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 37
+%define release 38
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -66,6 +66,7 @@ Obsoletes: e-smith-dynamicdns-dyndns
 BuildRequires: perl, perl(Test::Inline) >= 0.12
 BuildRequires: smeserver-devtools >= 1.13.1-03
 BuildRequires: gettext
+Requires: smeserver-postfix
 Requires: gdisk
 Requires: ppp
 Requires: rp-pppoe
@@ -182,6 +183,10 @@ fi
 
 
 %changelog
+* Wed Nov 12 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-38.sme
+- requires smeserver-postfix to protect it [SME: 13282]
+- cleanup smtp-auth-proxy  [SME: 12833]
+
 * Mon Nov 10 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-37.sme
 - change key type from ippp service to configuration [SME: 11367] 
 
