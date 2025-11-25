@@ -283,18 +283,6 @@ templates2events("/etc/inittab", qw(
 templates2events("/etc/lynx.cfg", qw(console-save bootstrap-console-save smeserver-base-update));
 templates2events("/etc/elinks.conf", qw(bootstrap-console-save smeserver-base-update));
 
-#--------------------------------------------------
-# functions for manager panel
-#--------------------------------------------------
-my $panel = "manager";
-
-panel_link("groups", $panel);
-panel_link("localnetworks", $panel);
-panel_link("online-manual", $panel);
-panel_link("reboot", $panel);
-panel_link("remoteaccess", $panel);
-panel_link("review", $panel);
-panel_link("useraccounts", $panel);
 
 #--------------------------------------------------
 # actions for smeserver-base-update event
