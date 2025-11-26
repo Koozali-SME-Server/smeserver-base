@@ -134,8 +134,8 @@ if ($ldapauth ne 'enabled')
 system("/usr/bin/smbpasswd", "-a", "-d", "$userName")
     and ( $x = 255, warn "Could not lock (smb) password for $userName\n" );
 
-my $serv = $conf->get('samba') || '';
-if (($serv eq 'service') && ($userName ne 'administrator'))
+my $serv = $conf->get('samba') ;
+if ((defined $serv) && ($userName ne 'administrator'))
 {
 my $samba = $conf->get('samba')->prop('status') || 'disabled';
 my $sambaip = $conf->get('samba')->prop('SambaIP') || '';

@@ -42,8 +42,8 @@ foreach my $u ($a->users)
 	system("/usr/bin/smbpasswd", "-d", $user) == 0
 	    or warn("Problem locking smbpassword for user $user\n");
 
-	my $serv = $c->get('samba') || '';
-	if (($serv eq 'service') && ($user ne 'administrator'))
+	my $serv = $c->get('samba') ;
+	if ((defined $serv) && ($user ne 'administrator'))
 	{
 	my $samba = $c->get('samba')->prop('status') || 'disabled';
 	my $sambaip = $c->get('samba')->prop('SambaIP') || '';

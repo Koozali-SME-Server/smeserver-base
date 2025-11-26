@@ -79,8 +79,8 @@ sub lock_user
         $conf->set_value('PasswordSet', 'no');
     }
 
-    my $serv = $conf->get('samba') || '';
-    if (($serv eq 'service') && ($userName ne 'administrator'))
+    my $serv = $conf->get('samba') ;
+    if ((defined $serv) && ($userName ne 'administrator'))
     {
     my $samba = $conf->get('samba')->prop('status') || 'disabled';
     my $sambaip = $conf->get('samba')->prop('SambaIP') || '';
