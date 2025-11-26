@@ -144,7 +144,7 @@ if ($sambaip eq '' || $sambapwd eq '')
     {
         $samba = 'disabled';
     }
-if ($samba eq 'enabled')
+if ( ($samba eq 'enabled') && (-e "/usr/bin/samba-tool") )
 {
 system("/usr/bin/samba-tool", "user", "add", "$userName", "--random-password", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")
     and ( $x = 255, warn "Could not create (addc) user for $userName\n" );

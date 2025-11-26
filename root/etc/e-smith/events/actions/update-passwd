@@ -52,7 +52,7 @@ foreach my $u ($a->users)
         {
 	    $samba = 'disabled';
         }
-	if ($samba eq 'enabled')
+	if ( ($samba eq 'enabled') && (-e "/usr/bin/samba-tool") )
 	{
 	system("/usr/bin/samba-tool", "user", "disable", "$user", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd") == 0
 	    or warn("Problem locking addc password for user $user\n");

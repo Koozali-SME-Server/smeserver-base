@@ -89,7 +89,7 @@ sub lock_user
     {
         $samba = 'disabled';
     }
-    if ($samba eq 'enabled')
+    if ( ($samba eq 'enabled') && (-e "/usr/bin/samba-tool") )
     {
     system("/usr/bin/samba-tool", "user", "disable", "$userName", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd") == 0
         or ( $x = 255, warn "Error locking (addc) account $userName" );

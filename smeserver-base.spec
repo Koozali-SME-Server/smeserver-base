@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 40
+%define release 41
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Tue Nov 25 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-41.sme
+- check if samba-tool bin present [SME: 12799]
+
 * Tue Nov 25 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-40.sme
 - remove old panel [SME: 13333]
 

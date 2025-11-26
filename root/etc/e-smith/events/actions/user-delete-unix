@@ -85,7 +85,7 @@ if ($sambaip eq '' || $sambapwd eq '')
     {
         $samba = 'disabled';
     }
-if ($samba eq 'enabled')
+if ( ($samba eq 'enabled') && (-e "/usr/bin/samba-tool") )
 {
 system("/usr/bin/samba-tool", "user", "delete", "$userName", "-H", "ldap://$sambaip", "--username=administrator", "--password=$sambapwd")
     and ( $x = 255, warn "Failed to delete (addc) account $userName.\n" );
