@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 43
+%define release 44
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -183,6 +183,10 @@ fi
 
 
 %changelog
+* Fri Nov 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-44.sme
+- replace server-manager to smanager in console [SME: 13092]
+- property PreviousDomainName [SME: 13258]
+
 * Fri Nov 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-43.sme
 - fix unwanted instantiated services on reboot [SME: 13335]
 

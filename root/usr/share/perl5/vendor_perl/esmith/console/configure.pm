@@ -151,6 +151,7 @@ sub doit
     return if ($db->get_prop('bootstrap-console', 'ForceSave') eq 'yes'); # We can skip the menus
     my $SystemName = $db->get_value('SystemName') || '';
     my $DomainName = $db->get_value('DomainName');
+    my $PreviousDomainName = $DomainName;
     my $bootstrapConsole =
 	$db->get_prop("bootstrap-console", "Run") || "no";
     my $rebootRequired = "no";
@@ -211,6 +212,7 @@ sub doit
         if ($choice =~ /^([a-zA-Z0-9\-\.]+)$/)
         {
             $db->set_value('DomainName', $DomainName = lc($1));
+            $db->set_prop('sysconfig','PreviousDomainName',$PreviousDomainName) if $PreviousDomainName ne $DomainName;
             goto SYSTEM_NAME;
         }
     }

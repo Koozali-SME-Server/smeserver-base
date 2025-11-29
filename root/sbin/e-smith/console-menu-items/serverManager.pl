@@ -38,7 +38,7 @@ sub doit
          text  =>
          gettext("This option will start a text-mode browser to access the server manager from this console.  Normally you would access the server manager from a web browser at the following url:") .
          "\n\n" .
-         "http://${SystemName}/server-manager/" .
+         "http://${SystemName}/smanager/" .
          "\n\n" .
          gettext("You should only proceed if you are comfortable using a text-mode browser.  Note that you will be prompted for the administrator password in order to access the server manager.") .
          "\n\n" .
@@ -51,7 +51,7 @@ sub doit
     {
 	system(
                    "/usr/bin/links",
-                   "http://localhost/server-manager"
+                   "http://localhost/smanager"
 	      );
     }
     $db->reload;
