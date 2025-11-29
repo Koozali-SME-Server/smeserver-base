@@ -7,14 +7,12 @@ foreach my $service ($c->get_all_by_prop(type => 'service')){
   $status = ($status eq "enabled") ? "enable" : "disable";
   unless ( $service->key ~~ @list ) {
     $status = "disable" if  -e "/etc/rc.d/init.d/".$service->key || -e "/etc/rc.d/init.d/supervise/".$service->key;
-    }
+  }
   my $multiple = $servicename;
   ($multiple = $servicename ) =~ s/([a-zA-Z0-9\-_.]+@)(.*)/$1.service/ if ( $servicename =~ /@/ );
 
   $OUT .= "# Systemd service file  does not exist :	" unless -e "/usr/lib/systemd/system/$servicename" || -e "/etc/systemd/system/$servicename" ||  -e "/usr/lib/systemd/system/$multiple";
+  $OUT .= "# $servicename is an instance of $multiple\n" unless $multiple eq $servicename ;
   $OUT .= "$status $servicename\n";
-  $OUT .= "$status $multiple\n" unless $multiple eq $servicename ;
-  
   }
-
 }
