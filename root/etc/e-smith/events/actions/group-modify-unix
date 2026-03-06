@@ -87,10 +87,10 @@ foreach my $group (@groups)
     }
 
     # modify group dedicated user cn
-    $result = $ldap->ldapmoduser($group);
+    $result = $ldap->ldapuser($group);
     $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description for $groupName.\n" );
     # modify Group description and mail
-    $result = $ldap->ldapmodgroup($group);
+    $result = $ldap->ldapgroup($group);
     $result  && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify (ldap) group description/email for $groupName.\n" );
 
     my ($name, $passwd, $gid, $members) = getgrnam ($groupName);
@@ -118,7 +118,7 @@ foreach my $group (@groups)
     # applying list of user memberUid for LDAP for this group
     $result = $ldap->ldapsetgroupmembers($groupName,\@newMembers);
     # error code 20 is entry already exits.
-    $result &&  ( $result->code != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify supplementary (ldap) group membership for $groupName.\n" );
+    $result &&  ( $result != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to modify supplementary (ldap) group membership for $groupName.\n" );
 
     foreach $member (@newMembers, @oldMembers)
     {

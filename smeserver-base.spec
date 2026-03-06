@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 44
+%define release 45
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Fri Mar 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-45.sme
+- fix ldap group modify [SME: 13451]
+
 * Fri Nov 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-44.sme
 - replace server-manager to smanager in console [SME: 13092]
 - property PreviousDomainName [SME: 13258]

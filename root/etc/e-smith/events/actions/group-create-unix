@@ -112,7 +112,7 @@ $result && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to create (lda
 my @UserArr = ($groupName);
 $result = $ldap->ldapsetgroupmembers($groupName,\@UserArr);
 # error code 20 is entry already exits.
-$result  &&  ( $result->code != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to add (ldap) account $groupName to supplementary group.\n" );
+$result  &&  ( $result != 20 ) && ( $x = $ldapauth ne 'enabled' ? $x : 255, warn "Failed to add (ldap) account $groupName to supplementary group.\n" );
 
 # Release lock if we have one
 $lock && esmith::lockfile::UnlockFile($lock);
