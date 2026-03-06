@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 45
+%define release 46
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL
@@ -133,7 +133,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/selinux
     --dir /etc/e-smith/skel/user/.ssh 'attr(0700,root,root)' \
     --file /etc/sysconfig/modules/dummy.modules 'attr(0755,root,root)' \
     --dir /etc/selinux 'attr(0755,root,root)' \
-    | sed -e '/\/etc\/dhcp$/d'  \
+    --ignoredir /etc/dhcp \
     > %{name}-%{version}-%{release}-filelist
 
 mkdir -p $RPM_BUILD_ROOT/home/e-smith/db
@@ -183,7 +183,7 @@ fi
 
 
 %changelog
-* Fri Mar 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-45.sme
+* Fri Mar 06 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-46.sme
 - fix ldap group modify [SME: 13451]
 
 * Fri Nov 28 2025 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-44.sme
