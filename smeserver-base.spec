@@ -7,7 +7,7 @@ Name: %{name}
 %define release 46
 Version: %{version}
 Release: %{release}%{?dist}
-License: GPL
+License: GPL2.0
 Group: Networking/Daemons
 Source: %{name}-%{version}.tar.xz
 #keeping this one for SME11
