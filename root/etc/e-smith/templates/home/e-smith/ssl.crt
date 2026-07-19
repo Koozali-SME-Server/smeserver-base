@@ -35,9 +35,13 @@
     $subjectAltName = ( $subjectAltName eq "DNS: ")? "": $subjectAltName;
     chomp $subjectAltName;
     # crop fields that are too long for X509:
+    # remove unwanted elements
+    $commonName =~ s/[''"]//g;
     $Country = substr($Country, 0, 2);
-    $defaultCity = substr($defaultCity, 0, 128); 
-    $defaultCompany = substr($defaultCompany, 0, 64); 
+    $defaultCity = substr($defaultCity, 0, 128);
+    $defaultCity =~ s/[''"]//g;
+    $defaultCompany = substr($defaultCompany, 0, 64);
+    $defaultCompany =~ s/[''"]//g;
     $defaultDepartment = substr($defaultDepartment, 0, 64);
     $defaultDepartment =~ s/[''"]//g;
     $email = substr($email, 0, 64);
