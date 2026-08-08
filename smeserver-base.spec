@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 47
+%define release 48
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL2.0
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Sat Aug 08 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-48.sme
+- encoding issue in call for user/group create/modify from SM2 [SME: 13684]
+
 * Sun Jul 19 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-47.sme
 - strips again unsupported characters [SME: 12218]
 

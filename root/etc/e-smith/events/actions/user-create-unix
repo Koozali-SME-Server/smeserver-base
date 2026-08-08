@@ -27,13 +27,13 @@ package esmith;
 use strict;
 use Errno;
 use esmith::ConfigDB;
-use esmith::AccountsDB;
+use esmith::AccountsDB::UTF8;
 use esmith::util;
 use utf8;
 use esmith::util::ldap;
 
 my $conf = esmith::ConfigDB->open_ro;
-my $accounts = esmith::AccountsDB->open;
+my $accounts = esmith::AccountsDB::UTF8->open;
 
 my $ldapauth = $conf->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value
@@ -67,8 +67,8 @@ unless ($uid = $acct->prop('Uid'))
     $acct->set_prop('Uid', $uid);
 }
 my $gid = $acct->prop('Gid') || $uid;
-my $first = stringToASCII($acct->prop('FirstName')) || '';
-my $last = stringToASCII($acct->prop('LastName')) || '';
+my $first = $acct->prop('FirstName') || '';
+my $last = $acct->prop('LastName') || '';
 my $phone = stringToASCII($acct->prop('Phone')) || '';
 my $company = stringToASCII($acct->prop('Company')) || '';
 my $dept = stringToASCII($acct->prop('Dept')) || '';

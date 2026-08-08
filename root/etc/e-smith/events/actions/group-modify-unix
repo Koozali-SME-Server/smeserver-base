@@ -27,13 +27,13 @@ package esmith;
 use strict;
 use Errno;
 use esmith::ConfigDB;
-use esmith::AccountsDB;
-use esmith::util;
+use esmith::AccountsDB::UTF8;
 use utf8;
+use esmith::util;
 use esmith::util::ldap;
 
 my $c = esmith::ConfigDB->open_ro || die "Couldn't open config db\n";
-my $a = esmith::AccountsDB->open_ro || die "Couldn't open accounts db\n";
+my $a = esmith::AccountsDB::UTF8->open_ro || die "Couldn't open accounts db\n";
 
 my $ldapauth = $c->get('ldap')->prop('Authentication') || 'disabled';
 my $x = 0; # exit value

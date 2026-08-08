@@ -20,10 +20,10 @@ package esmith;
 
 use strict;
 use Errno;
-use esmith::AccountsDB;
+use utf8;
+use esmith::AccountsDB::UTF8;
 use esmith::ConfigDB;
 use esmith::util;
-use utf8;
 use esmith::util::ldap;
 
 my $conf = esmith::ConfigDB->open or die "Could not open configuration db";
@@ -42,7 +42,7 @@ my $userName = $ARGV [1];
 #------------------------------------------------------------
 
 
-my $a = esmith::AccountsDB->open or die "Could not open accounts db";
+my $a = esmith::AccountsDB::UTF8->open or die "Could not open accounts db";
 
 my @users;
 if ($event eq 'bootstrap-ldap-save')
@@ -88,8 +88,8 @@ foreach my $u (@users)
     # Modify user's first name and last name if required,
     # in /etc/passwd using "usermod"
     #------------------------------------------------------------
-    my $first = stringToASCII($u->prop('FirstName') || "");
-    my $last = stringToASCII($u->prop('LastName') || "");
+    my $first = $u->prop('FirstName') || ""; 
+    my $last = $u->prop('LastName') || "";
     my $new_comment = "$first $last";
 
     unless ($comment eq $new_comment)
