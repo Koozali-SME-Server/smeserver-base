@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 48
+%define release 49
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL2.0
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Mon Sep 28 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-49.sme
+- apply console config change before reboot [SME: 13755]
+
 * Sat Aug 08 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-48.sme
 - encoding issue in call for user/group create/modify from SM2 [SME: 13684]
 

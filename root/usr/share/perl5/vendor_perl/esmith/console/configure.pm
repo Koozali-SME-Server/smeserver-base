@@ -18,11 +18,11 @@ sub new
 {
     my $class = shift;
     my $self = {
-		    name => gettext("Configure this server"),
-		    order => 20,
-		    bootstrap => 0,
-		    @_,
-		};
+                    name => gettext("Configure this server"),
+                    order => 20,
+                    bootstrap => 0,
+                    @_,
+                };
     bless $self, $class;
     return $self;
 }
@@ -49,17 +49,17 @@ sub ethernetSelect($$)
 
     if (scalar @adapters == 1)
     {
-	if ($ifName eq "external" && $db->get_prop('InternalInterface', 'Name') ne 'dummy0')
-	{
-	    # We'll use a VLAN on eth0 for the "dedicated" WAN link
-	    $db->set_value("EthernetDriver2", "unknown");
-	    return 'CHANGE';
-	}
-	else
-	{
-	    # Add a dummy network interface, only valid for internal nic
-	    push @adapters, "dummy\tdummy\t10:00:01:02:03:04\tFake Network Interface\tdummy0";
-	}
+        if ($ifName eq "external" && $db->get_prop('InternalInterface', 'Name') ne 'dummy0')
+        {
+            # We'll use a VLAN on eth0 for the "dedicated" WAN link
+            $db->set_value("EthernetDriver2", "unknown");
+            return 'CHANGE';
+        }
+        else
+        {
+            # Add a dummy network interface, only valid for internal nic
+            push @adapters, "dummy\tdummy\t10:00:01:02:03:04\tFake Network Interface\tdummy0";
+        }
     }
 
     my %tag2driver;
@@ -88,19 +88,19 @@ sub ethernetSelect($$)
         chomp($chipset);
         
         #Ensure these are defined to at least "N/A" as no selection is shown if these are not defined.
-	$hwaddr = "N/A" unless $hwaddr;
-	$driver = "N/A" unless $driver;
+        $hwaddr = "N/A" unless $hwaddr;
+        $driver = "N/A" unless $driver;
 
-	my $tag = ++$item . ".";
+        my $tag = ++$item . ".";
 
-	$tag2driver{$tag} = $driver;
-	$tag2device{$tag} = $device;
-	
-	my $display_name = gettext("Use") ." ". ${driver}. " " . $hwaddr ." ". ${chipset};
+        $tag2driver{$tag} = $driver;
+        $tag2device{$tag} = $device;
+        
+        my $display_name = gettext("Use") ." ". ${driver}. " " . $hwaddr ." ". ${chipset};
 
         if ($device ne $skip)
         {
-	    push(@args, $tag, substr($display_name, 0, 65));
+            push(@args, $tag, substr($display_name, 0, 65));
             $default = $tag if $device eq $existing_device;
             $default ||= $tag;
         }
@@ -119,13 +119,13 @@ sub ethernetSelect($$)
         (
          title => sprintf(gettext("Select %s network device"),
                           gettext($ifName)),
-	 default => $default,
+         default => $default,
          text  =>
          sprintf(gettext("You now need to select the proper device for your " .
-	      "%s network. The server can attempt to do " .
-	      "this automatically, or you can do it manually.  " .
-	      "The network driver, MAC address and model of your " .
-	      "network adapter are listed below.\n"), gettext($ifName)),
+              "%s network. The server can attempt to do " .
+              "this automatically, or you can do it manually.  " .
+              "The network driver, MAC address and model of your " .
+              "network adapter are listed below.\n"), gettext($ifName)),
          argsref => \@args,
         );
 
@@ -153,7 +153,7 @@ sub doit
     my $DomainName = $db->get_value('DomainName');
     my $PreviousDomainName = $DomainName;
     my $bootstrapConsole =
-	$db->get_prop("bootstrap-console", "Run") || "no";
+        $db->get_prop("bootstrap-console", "Run") || "no";
     my $rebootRequired = "no";
     my ($rc, $choice);
 
@@ -202,9 +202,9 @@ sub doit
 
     if ($rc != 0)
     {
-	# If user cancelled, either loop or go back to main menu
-	goto DOMAIN_NAME if $self->{bootstrap};
-	return;
+        # If user cancelled, either loop or go back to main menu
+        goto DOMAIN_NAME if $self->{bootstrap};
+        return;
     }
 
     if ($choice)
@@ -482,7 +482,7 @@ SERVER_GATEWAY:
     my $currentmode;
     my $currentnumber;
     my $dialup_support = $db->get_prop("bootstrap-console", "DialupSupport")
-			    || "yes";
+                            || "yes";
 
     if ($dialup_support eq "no")
     {
@@ -544,10 +544,10 @@ ETHERNET_EXTERNAL:
              title => gettext("Only one network adapter"),
              text  =>
              gettext("Your system only has a single network adapter. It cannot be used in this configuration."),
-	     left => "",
-	     right => "Back",
+             left => "",
+             right => "Back",
             );
-	goto SERVER_GATEWAY;
+        goto SERVER_GATEWAY;
     }
     my ($selectMode, $newDriver) = ethernetSelect('external', 'EthernetDriver2');
 
@@ -645,7 +645,7 @@ SERVER_GATEWAY_DEDICATED:
     ($rc, $choice) = $console->menu_page
         (
          title   => gettext("External Interface Configuration"),
-	 default => $currentnumber,
+         default => $currentnumber,
          text    =>
          gettext("Next, specify how to configure the external ethernet adapter.") .
          "\n\n" .
@@ -895,26 +895,26 @@ STATIC_GATEWAY:
     my $error = undef;
     if (!isValidIP($choice))
     {
-	$error = "not a valid IP address";
+        $error = "not a valid IP address";
     }
     elsif (cleanIP($choice) eq $db->get_value('ExternalIP'))
     {
-	$error = "address matches external interface address";
+        $error = "address matches external interface address";
     }
     elsif (!ipv4_in_network($db->get_value('ExternalIP'),
-	$db->get_value('ExternalNetmask'), "$choice/32") && $db->get_value('ExternalNetmask') ne '255.255.255.255')
+        $db->get_value('ExternalNetmask'), "$choice/32") && $db->get_value('ExternalNetmask') ne '255.255.255.255')
     {
-	$error = "address is not local";
+        $error = "address is not local";
     }
     if ($error)
     {
-	($rc, $choice) = $console->tryagain_page
-	    (
-	     title   => gettext("Invalid") . " - " . gettext($error),
-	     choice  => $choice,
-	    );
+        ($rc, $choice) = $console->tryagain_page
+            (
+             title   => gettext("Invalid") . " - " . gettext($error),
+             choice  => $choice,
+            );
 
-	goto STATIC_GATEWAY;
+        goto STATIC_GATEWAY;
     }
     $db->set_value('GatewayIP', cleanIP($choice));
     goto OTHER_PARAMETERS;
@@ -937,7 +937,7 @@ DIALUP_MODEM:
     ($rc, $choice) = $console->menu_page
         (
          title => gettext("Select modem/ISDN port"),
-	 default =>  $db->get_value('DialupModemDevice'),
+         default =>  $db->get_value('DialupModemDevice'),
          text  =>
          gettext("Please specify which serial port your modem or ISDN terminal adapter is connected to. Select ISDN if you wish to use an internal ISDN card."),
          argsref => \@args
@@ -1366,7 +1366,7 @@ DIALUP_OFFICE:
     ($rc, $choice) = $console->menu_page
         (
          title => gettext("Select connect policy"),
-	 default => gettext($val),
+         default => gettext($val),
          text  =>
          gettext("Select the dialup connect policy that you would like to use during office hours (8:00 AM to 6:00 PM) on weekdays."),
 
@@ -1390,7 +1390,7 @@ DIALUP_OUTSIDE:
     ($rc, $choice) = $console->menu_page
         (
          title => gettext("Select connect policy"),
-	 default => gettext($val),
+         default => gettext($val),
          text  =>
          gettext("Please select the dialup connect policy that you would like to use outside office hours (6:00 PM to 8:00 AM) on weekdays."),
          argsref => \@connect_options,
@@ -1412,7 +1412,7 @@ DIALUP_WEEKEND:
     ($rc, $choice) = $console->menu_page
         (
          title => gettext("Select connect policy"),
-	 default => gettext($val),
+         default => gettext($val),
          text  =>
          gettext("Please select the dialup connect policy that you would like to use during the weekend."),
          argsref => \@connect_options,
@@ -1439,7 +1439,7 @@ SERVER_ONLY:
         if (!defined $val){$db->set_prop('InternalInterface', 'NICBonding', 'disabled');}
         $val ||= 'disabled';
         if($driver1 eq $driver2)
-        {	    
+        {            
             my @args = (
                     gettext("enabled"), gettext("Enable NIC bonding"),
                     gettext("disabled"), gettext("Disable NIC bonding")
@@ -1448,15 +1448,15 @@ SERVER_ONLY:
             ($rc, $choice) = $console->menu_page
                 (
                 title => gettext("NIC Bonding"),
-		      default => gettext($val),
+                      default => gettext($val),
                 text  =>
                 gettext("You have more than one network adapter. Would you like to bond them together into a single interface? This can provide greater throughput and/or failure resiliency, depending on your adapters and network configuration."),
                 argsref => \@args
             );
 
-	    $db->set_prop('InternalInterface', 'NICBonding', 
+            $db->set_prop('InternalInterface', 'NICBonding', 
                     ($choice eq gettext('enabled')) ? 'enabled' : 'disabled');
-	    $db->set_prop('InternalInterface', 'Name', 'bond0')
+            $db->set_prop('InternalInterface', 'Name', 'bond0')
                     if ($choice eq gettext('enabled'));
 
             $db->set_value("EthernetDriver2", 
@@ -1519,26 +1519,26 @@ SERVER_ONLY:
     my $error = undef;
     if (!isValidIP($choice))
     {
-	$error = "not a valid IP address";
+        $error = "not a valid IP address";
     }
     elsif (cleanIP($choice) eq $db->get_value('LocalIP'))
     {
-	$error = "address matches local interface address";
+        $error = "address matches local interface address";
     }
     elsif (!ipv4_in_network($db->get_value('LocalIP'),
-	$db->get_value('LocalNetmask'), "$choice/32"))
+        $db->get_value('LocalNetmask'), "$choice/32"))
     {
-	$error = "address is not local";
+        $error = "address is not local";
     }
     if ($error)
     {
-	($rc, $choice) = $console->tryagain_page
-	    (
-	     title   => gettext("Invalid") . " - " . gettext($error),
-	     choice  => $choice,
-	    );
+        ($rc, $choice) = $console->tryagain_page
+            (
+             title   => gettext("Invalid") . " - " . gettext($error),
+             choice  => $choice,
+            );
 
-	goto SERVER_ONLY;
+        goto SERVER_ONLY;
     }
     $db->set_value('GatewayIP', cleanIP($choice));
     $db->set_value('AccessType', 'dedicated');
@@ -1573,13 +1573,13 @@ DHCP_SERVER:
     my $localnet = $localip & $netmask;
     # Delete the current DHCP leases file if we are changing networks
     unless ((($start & $netmask) == $localnet) &&
-	    (($end & $netmask) == $localnet))
+            (($end & $netmask) == $localnet))
     {
-	my $dhcpLeases = "/var/lib/dhcpd/dhcpd.leases";
-	open (WR, ">$dhcpLeases")
-	    or die gettext("Can't open output file"),
-		" $dhcpLeases", ": $!\n";
-	close WR;
+        my $dhcpLeases = "/var/lib/dhcpd/dhcpd.leases";
+        open (WR, ">$dhcpLeases")
+            or die gettext("Can't open output file"),
+                " $dhcpLeases", ": $!\n";
+        close WR;
     }
     # AND-out the host bits from the start and end ips.
     # And, OR our local network with our start and end host values.
@@ -1588,9 +1588,9 @@ DHCP_SERVER:
     # Make sure that $start is less than $end (might not be if netmask has changed
     if ($start > $end)
     {
-	my $temp = $start;
-	$start = $end;
-	$end = $temp;
+        my $temp = $start;
+        $start = $end;
+        $end = $temp;
     }
     $start = esmith::util::IPaddrToQuad($start);
     $end   = esmith::util::IPaddrToQuad($end);
@@ -1609,7 +1609,7 @@ DHCP_SERVER:
     ($rc, $choice) = $console->menu_page
         (
          title => gettext("Select DHCP server configuration"),
-	 default => $DHCPServer,
+         default => $DHCPServer,
          text  =>
          gettext("Please specify whether you would like this server to provide DHCP service to your local network. This will let you assign IP addresses to your other network computers automatically by configuring them to obtain their IP information using DHCP.") .
          "\n\n" .
@@ -1661,30 +1661,30 @@ DHCP_SERVER_BEGIN:
     {
         if ( isValidIP($choice) )
         {
-	    my $dhcp_net = ipv4_network($choice, $priv_mask);
-	    if ($dhcp_net eq $priv_net)
-	    {
-		# need to check for valid range as well.
-		unless ($choice eq $start)
-		{
-		    $db->set_prop('dhcpd', 'start', cleanIP($choice));
-		}
-		goto DHCP_SERVER_END;
-	    }
-	    else
-	    {   
-		$errmsg = gettext("That address is not on the local network.");
-	    }
-	}
-	else
-	{   
-	    $errmsg = gettext("Invalid IP address for DHCP start");
-	}
+            my $dhcp_net = ipv4_network($choice, $priv_mask);
+            if ($dhcp_net eq $priv_net)
+            {
+                # need to check for valid range as well.
+                unless ($choice eq $start)
+                {
+                    $db->set_prop('dhcpd', 'start', cleanIP($choice));
+                }
+                goto DHCP_SERVER_END;
+            }
+            else
+            {   
+                $errmsg = gettext("That address is not on the local network.");
+            }
+        }
+        else
+        {   
+            $errmsg = gettext("Invalid IP address for DHCP start");
+        }
     }
     else
     {
         $choice = '';
-	$errmsg = gettext("You must provide an IP address for the start of the DHCP range.");
+        $errmsg = gettext("You must provide an IP address for the start of the DHCP range.");
     }
 
     ($rc, $choice) = $console->tryagain_page
@@ -1728,26 +1728,26 @@ DHCP_SERVER_END:
         my $ip_count      = $ip_end - $ip_start;
         my $vpn_sessions = $db->get_prop('vpn','sessions');
 
-	    my $dhcp_net = ipv4_network($choice, $priv_mask);
-	    if ($dhcp_net eq $priv_net)
-	    {
-		# There are a few additional things to confirm here. We now
-		# know that the chosen range is on the same network as the
-		# private interface. We should ensure that it does not overlap
-		# the private interface, and that the end is larger than the
-		# beginning. 
-		if (cmpIP($serverStart, $choice) < 0)
-		{
-		    if (((cmpIP($priv_ip, $serverStart) < 0) ||
-			(cmpIP($choice, $priv_ip) < 0)) && ($ip_count > $vpn_sessions))
-		    {
-			# need to check for valid range as well.
-			unless ($choice eq $serverEnd)
-			{
-			    $db->set_prop('dhcpd', 'end', cleanIP($choice));
-			}
-			goto DNS_FORWARDER;
-		    }
+            my $dhcp_net = ipv4_network($choice, $priv_mask);
+            if ($dhcp_net eq $priv_net)
+            {
+                # There are a few additional things to confirm here. We now
+                # know that the chosen range is on the same network as the
+                # private interface. We should ensure that it does not overlap
+                # the private interface, and that the end is larger than the
+                # beginning. 
+                if (cmpIP($serverStart, $choice) < 0)
+                {
+                    if (((cmpIP($priv_ip, $serverStart) < 0) ||
+                        (cmpIP($choice, $priv_ip) < 0)) && ($ip_count > $vpn_sessions))
+                    {
+                        # need to check for valid range as well.
+                        unless ($choice eq $serverEnd)
+                        {
+                            $db->set_prop('dhcpd', 'end', cleanIP($choice));
+                        }
+                        goto DNS_FORWARDER;
+                    }
             # We want to verify that the number of vpn_IP reserved is not superior
             # than the number of dhcp_IP set in the range
             elsif ($ip_count <= $vpn_sessions)
@@ -1755,32 +1755,32 @@ DHCP_SERVER_END:
             $errmsg = gettext("There is not enough IP in the range to include all your vpn sessions");
             $choice = $vpn_sessions . ' allowed vpn clients';
             }
-		    else
-		    {
-			$errmsg = gettext("The IP range cannot include our private network address.");
-			$choice = $priv_ip;
-		    }
-		}
-		else
-		{
-		    $errmsg = gettext("The end of the range must be larger than the start.");
-		    $choice = $serverStart;
-		}
-	    }
-	    else
-	    {
-		$errmsg = gettext("That address is not on the local network.");
-	    }
+                    else
+                    {
+                        $errmsg = gettext("The IP range cannot include our private network address.");
+                        $choice = $priv_ip;
+                    }
+                }
+                else
+                {
+                    $errmsg = gettext("The end of the range must be larger than the start.");
+                    $choice = $serverStart;
+                }
+            }
+            else
+            {
+                $errmsg = gettext("That address is not on the local network.");
+            }
         }
-	else
-	{
-	    $errmsg = gettext("Invalid IP address for DHCP start");
-	}
+        else
+        {
+            $errmsg = gettext("Invalid IP address for DHCP start");
+        }
     }
     else
     {
         $choice = '';
-	$errmsg = gettext("You must provide an IP address for the end of the DHCP range.");
+        $errmsg = gettext("You must provide an IP address for the end of the DHCP range.");
     }
 
     ($rc, $choice) = $console->tryagain_page
@@ -1868,24 +1868,29 @@ QUERY_SAVE_CONFIG:
         {
             $db->set_prop("bootstrap-console", "Run", "yes");
             $db->set_prop("bootstrap-console", "ForceSave", "yes");
-	    ($rc, $choice) = $console->yesno_page
-		(
-		 title   => gettext("Changes will take effect after reboot"),
-		     text =>
-			 gettext("The new configuration will take effect when you reboot the server.") .
-			 "\n\n" .
-			 gettext("Do you wish to reboot right now?"),
-		);
+            $console->infobox(
+              title => gettext("Activating configuration settings"),
+              text => gettext("Please stand by while your configuration settings are activated ..."),
+            );
+            system("/sbin/e-smith/signal-event", "post-upgrade");
+            ($rc, $choice) = $console->yesno_page
+                (
+                 title   => gettext("Changes will take effect after reboot"),
+                     text =>
+                         gettext("The new configuration will take effect when you reboot the server.") .
+                         "\n\n" .
+                         gettext("Do you wish to reboot right now?"),
+                );
 
-	    return unless ($rc == 0);
+            return unless ($rc == 0);
 
-	    system("/usr/bin/tput", "clear");
-	    system("/sbin/e-smith/signal-event", "reboot");
+            system("/usr/bin/tput", "clear");
+            system("/sbin/e-smith/signal-event", "reboot");
 
-	    # A bit of a hack to avoid the console restarting before the
-	    # reboot takes effect.
+            # A bit of a hack to avoid the console restarting before the
+            # reboot takes effect.
 
-	    sleep(600);
+            sleep(600);
         }
 
         unless ($self->{bootstrap})
@@ -1925,14 +1930,14 @@ QUERY_SAVE_CONFIG:
         system("/sbin/e-smith/signal-event", "console-save");
         $db->reload;
 
-	my $current_mode = (getppid() == 1) ? "auto" : "login";
-	if ($current_mode ne $db->get_value('ConsoleMode'))
-	{
-	    # If we switch from login to auto or vv, then we
-	    # need to quite here
-	    goto QUIT1;
-	}
-	return;
+        my $current_mode = (getppid() == 1) ? "auto" : "login";
+        if ($current_mode ne $db->get_value('ConsoleMode'))
+        {
+            # If we switch from login to auto or vv, then we
+            # need to quite here
+            goto QUIT1;
+        }
+        return;
     }
 }
 #------------------------------------------------------------
@@ -1941,17 +1946,17 @@ QUIT:
 {
     if ( $db->get_value('UnsavedChanges') eq 'yes' )
     {
-	($rc, $choice) = $console->yesno_page
-	    (
-	     title   => gettext("*** THERE ARE UNACTIVATED CHANGES - QUIT ANYWAY? ***"),
-	     defaultno => 1,
-	     text =>
-	     gettext("Your configuration changes have been saved but have not yet been activated. This may result in unpredictable system behavior. We recommend that you complete the configuration process and activate the changes before exiting the console.") .
-	     "\n\n" .
-	     gettext("Are you sure you want to quit with unactivated changes?"),
-	    );
+        ($rc, $choice) = $console->yesno_page
+            (
+             title   => gettext("*** THERE ARE UNACTIVATED CHANGES - QUIT ANYWAY? ***"),
+             defaultno => 1,
+             text =>
+             gettext("Your configuration changes have been saved but have not yet been activated. This may result in unpredictable system behavior. We recommend that you complete the configuration process and activate the changes before exiting the console.") .
+             "\n\n" .
+             gettext("Are you sure you want to quit with unactivated changes?"),
+            );
 
-	return unless ($rc == 0);
+        return unless ($rc == 0);
     }
 }
 
