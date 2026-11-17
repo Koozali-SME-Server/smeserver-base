@@ -83,6 +83,28 @@ templates2events("/etc/crontab",  qw(
 	logrotate
 	smeserver-base-update
 	));
+
+templates2events("/etc/anacrontab",  qw(
+        console-save
+        bootstrap-console-save
+        post-install
+        post-upgrade
+        email-update
+        logrotate
+        smeserver-base-update
+        ));
+
+templates2events("/etc/cron.d/0hourly",  qw(
+        console-save
+        bootstrap-console-save
+        post-install
+        post-upgrade
+        email-update
+        logrotate
+        smeserver-base-update
+        ));
+
+
 templates2events("/etc/mime.types",  qw(
 	console-save
 	bootstrap-console-save

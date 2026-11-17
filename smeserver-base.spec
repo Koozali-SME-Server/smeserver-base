@@ -4,7 +4,7 @@ Summary: smeserver server and gateway - base module
 %define name smeserver-base
 Name: %{name}
 %define version 11.0.0
-%define release 49
+%define release 50
 Version: %{version}
 Release: %{release}%{?dist}
 License: GPL2.0
@@ -183,6 +183,9 @@ fi
 
 
 %changelog
+* Tue Nov 17 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-50.sme
+- set MAILTO for anacron, crontab and cron.hourly [SME: 13839]
+
 * Mon Sep 28 2026 Jean-Philippe Pialasse <jpp@koozali.org> 11.0.0-49.sme
 - apply console config change before reboot [SME: 13755]
 
